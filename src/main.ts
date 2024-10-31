@@ -1,1 +1,1 @@
-export const name = 'template-ts';
+export const name = 'type-war';

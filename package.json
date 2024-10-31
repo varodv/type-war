@@ -1,5 +1,5 @@
 {
-  "name": "template-ts",
+  "name": "type-war",
   "version": "1.0.0",
   "private": true,
   "type": "module",
@@ -7,7 +7,7 @@
     "preinstall": "npx only-allow pnpm",
     "prepare": "husky",
     "lint": "eslint .",
-    "lint:ci": "pnpm run lint --cache --cache-strategy content --cache-location ~/.cache/eslint/template-ts",
+    "lint:ci": "pnpm run lint --cache --cache-strategy content --cache-location ~/.cache/eslint/type-war",
     "build": "tsc --project tsconfig.build.json",
     "test": "vitest run",
     "coverage": "vitest run --coverage"
