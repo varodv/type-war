@@ -1,0 +1,14 @@
+.DS_Store
+
+node_modules
+
+*-debug.log*
+yarn-error.log*
+
+.eslintcache
+
+dist
+
+*.tgz
+
+coverage

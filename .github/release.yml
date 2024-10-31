@@ -1,0 +1,53 @@
+changelog:
+  exclude:
+    labels:
+      - chore
+
+  categories:
+    - title: ⚠️ BREAKING CHANGES
+      labels:
+        - BREAKING CHANGE
+
+    - title: New features
+      labels:
+        - feat
+
+    - title: Bug fixes
+      labels:
+        - fix
+
+    - title: Performance improvements
+      labels:
+        - perf
+
+    - title: Documentation
+      labels:
+        - docs
+
+    - title: Testing
+      labels:
+        - test
+
+    - title: Code refactor
+      labels:
+        - refactor
+
+    - title: Code style
+      labels:
+        - style
+
+    - title: Build
+      labels:
+        - build
+
+    - title: CI
+      labels:
+        - ci
+
+    - title: Revert
+      labels:
+        - revert
+
+    - title: Other
+      labels:
+        - '*'

@@ -1,0 +1,79 @@
+name: labeler
+
+on:
+  pull_request:
+    types:
+      - labeled
+      - unlabeled
+      - opened
+      - edited
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  label:
+    if: github.event.pull_request.user.login != 'dependabot[bot]'
+
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Label
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const typeLabels = [
+              'feat',
+              'fix',
+              'perf',
+              'docs',
+              'test',
+              'refactor',
+              'style',
+              'build',
+              'ci',
+              'revert',
+              'chore',
+            ];
+            const repoLabels = [...typeLabels, 'BREAKING CHANGE'];
+            const prBody = context.payload.pull_request.body;
+            const prLabels = (
+              await github.rest.issues.listLabelsOnIssue({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+              })
+            ).data.map((label) => label.name);
+            const prTypeLabels = [];
+            for (const label of repoLabels) {
+              if (prBody.includes(`[x] ${label}: `)) {
+                if (!prLabels.includes(label)) {
+                  await github.rest.issues.addLabels({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    issue_number: context.issue.number,
+                    labels: [label],
+                  });
+                }
+                if (typeLabels.includes(label)) {
+                  prTypeLabels.push(label);
+                }
+              } else if (prLabels.includes(label)) {
+                await github.rest.issues.removeLabel({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: context.issue.number,
+                  name: label,
+                });
+              }
+            }
+            if (prTypeLabels.length !== 1) {
+              core.setFailed(
+                `One and only one type label must be set, tried [${prTypeLabels.join(', ')}]`,
+              );
+            }

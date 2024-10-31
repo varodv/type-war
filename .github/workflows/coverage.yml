@@ -1,0 +1,64 @@
+name: coverage
+
+on:
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  coverage:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install
+        uses: ./.github/actions/install
+
+      - name: Run coverage
+        run: |
+          echo 'COVERAGE_OUTPUT<<EOF' >> $GITHUB_ENV
+          pnpm run coverage >> $GITHUB_ENV
+          echo EOF >> $GITHUB_ENV
+
+      - name: Get result
+        id: get-result
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const output = process.env.COVERAGE_OUTPUT;
+            const summary = output.split('\n').find((line) => line.startsWith('All files'));
+            const [stmtsPct, branchPct, funcsPct, linesPct] = summary
+              .split(' | ')
+              .slice(1)
+              .map(Number);
+            return linesPct;
+
+      - name: Generate badge
+        uses: emibcn/badge-action@v2
+        with:
+          label: Coverage
+          status: ${{ steps.get-result.outputs.result }}%
+          color: ${{
+            steps.get-result.outputs.result > 90 && 'green'              ||
+            steps.get-result.outputs.result > 80 && 'yellow,green'       ||
+            steps.get-result.outputs.result > 70 && 'yellow'             ||
+            steps.get-result.outputs.result > 60 && 'orange,yellow'      ||
+            steps.get-result.outputs.result > 50 && 'orange'             ||
+            steps.get-result.outputs.result > 40 && 'red,orange'         ||
+            steps.get-result.outputs.result > 30 && 'red,red,orange'     ||
+            steps.get-result.outputs.result > 20 && 'red,red,red,orange' ||
+            'red' }}
+          path: .github/badges/coverage.svg
+
+      - name: Push badge
+        run: |
+          git config --local user.name "github-actions[bot]"
+          git config --local user.email "template-ts@noreply.github.com"
+          git commit -a -m "Update coverage badge" || true
+          git push
