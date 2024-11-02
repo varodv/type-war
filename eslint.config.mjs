@@ -17,4 +17,7 @@ export default [
   {
     files: ['**/*.{ts,tsx}'],
   },
+  {
+    ignores: ['dist'],
+  },
 ];
