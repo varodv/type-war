@@ -1,6 +1,6 @@
 import type { Enemy } from '../../enemy/types';
 import type { Entity } from '../../entity/types';
-import type { Position } from '../../shared/types';
+import type { Position } from '../../position/types';
 
 export type Event = PlayEvent | SpawnEvent | HitEvent;
 
