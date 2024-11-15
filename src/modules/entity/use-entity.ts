@@ -7,8 +7,8 @@ function create<Type extends Record<string, unknown>>(
     throw new Error("The given payload already has a property 'id'");
   }
   return {
-    id: crypto.randomUUID(),
     ...payload,
+    id: crypto.randomUUID(),
   };
 }
 
