@@ -8,7 +8,7 @@ export default defineConfig({
   test: {
     globals: true,
     coverage: {
-      exclude: [...coverageConfigDefaults.exclude, 'src/**/types/index.ts'],
+      exclude: [...coverageConfigDefaults.exclude, 'src/**/types'],
     },
   },
 });
