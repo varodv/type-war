@@ -2,14 +2,14 @@ import { ref } from 'vue';
 import type { Emitted, Event } from './types';
 import { useEntity } from '../entity/use-entity';
 
-const { create: createEntity } = useEntity();
+const { create } = useEntity();
 
 const emittedEvents = ref<Array<Emitted<Event>>>([]);
 
 function emit(...events: Array<Event>) {
   const timestamp = new Date();
   const newEvents = events.map<Emitted<Event>>((event) =>
-    createEntity({
+    create({
       ...event,
       timestamp,
     }),
