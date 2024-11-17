@@ -6,7 +6,7 @@ const { create: createEntity } = useEntity();
 
 const emittedEvents = ref<Array<Emitted<Event>>>([]);
 
-function emit(...events: Array<Event>): Array<Emitted<Event>> {
+function emit(...events: Array<Event>) {
   const timestamp = new Date();
   const newEvents = events.map<Emitted<Event>>((event) =>
     createEntity({
