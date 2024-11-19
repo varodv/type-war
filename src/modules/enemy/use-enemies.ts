@@ -24,7 +24,7 @@ function spawn(quantity = 1) {
       },
     });
   }
-  return emit(...events);
+  return emit(...events) as Array<SpawnEvent>;
 }
 
 export function useEnemies() {
