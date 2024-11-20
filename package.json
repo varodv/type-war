@@ -22,7 +22,7 @@
     "*.{js,json,md,yml}": "prettier --write"
   },
   "dependencies": {
-    "vue": "^3.5.12"
+    "vue": "^3.5.13"
   },
   "devDependencies": {
     "@eslint/js": "^9.14.0",
