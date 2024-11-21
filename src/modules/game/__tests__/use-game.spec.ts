@@ -21,9 +21,13 @@ describe('useGame', () => {
   describe('time', () => {
     beforeEach(() => {
       setTime(0);
-      vi.mock('@vueuse/core', () => ({
-        useNow: () => computed(() => now.value),
-      }));
+      vi.mock('@vueuse/core', async (importOriginal) => {
+        const actual = await importOriginal();
+        return {
+          ...(actual as object),
+          useNow: () => computed(() => now.value),
+        };
+      });
     });
 
     afterEach(() => {

@@ -1,24 +1,27 @@
+import { createSharedComposable } from '@vueuse/core';
 import { ref } from 'vue';
 import type { Emitted, Event } from './types';
 import { useEntity } from '../entity/use-entity';
 
-const { create } = useEntity();
+export const useEvents = createSharedComposable(setup);
 
-const emittedEvents = ref<Array<Emitted<Event>>>([]);
+function setup() {
+  const { create } = useEntity();
 
-function emit(...events: Array<Event>) {
-  const timestamp = new Date();
-  const newEvents = events.map<Emitted<Event>>((event) =>
-    create({
-      ...event,
-      timestamp,
-    }),
-  );
-  emittedEvents.value.push(...newEvents);
-  return newEvents;
-}
+  const emittedEvents = ref<Array<Emitted<Event>>>([]);
 
-export function useEvents() {
+  function emit(...events: Array<Event>) {
+    const timestamp = new Date();
+    const newEvents = events.map<Emitted<Event>>((event) =>
+      create({
+        ...event,
+        timestamp,
+      }),
+    );
+    emittedEvents.value.push(...newEvents);
+    return newEvents;
+  }
+
   return {
     emittedEvents,
     emit,

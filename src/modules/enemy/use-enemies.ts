@@ -1,3 +1,4 @@
+import { createSharedComposable } from '@vueuse/core';
 import { computed } from 'vue';
 import { useEntity } from '../entity/use-entity';
 import type { SpawnEvent } from '../event/types';
@@ -6,28 +7,14 @@ import { useGlossary } from '../glossary/use-glossary';
 import { usePosition } from '../position/use-position';
 import type { Enemy } from './types';
 
-const { emittedEvents, emit } = useEvents();
-const { create } = useEntity();
-const { getNextWord } = useGlossary();
-const { getRandomPosition } = usePosition();
+export const useEnemies = createSharedComposable(setup);
 
-function spawn(quantity = 1) {
-  const events: Array<SpawnEvent> = [];
-  for (let i = 0; i < quantity; i++) {
-    events.push({
-      type: 'SPAWN',
-      payload: {
-        entity: create({
-          word: getNextWord(),
-        }),
-        position: getRandomPosition(),
-      },
-    });
-  }
-  return emit(...events) as Array<SpawnEvent>;
-}
+function setup() {
+  const { emittedEvents, emit } = useEvents();
+  const { create } = useEntity();
+  const { getNextWord } = useGlossary();
+  const { getRandomPosition } = usePosition();
 
-export function useEnemies() {
   const enemies = computed(() => {
     const lastPlayEventIndex = emittedEvents.value.findLastIndex(
       (event) => event.type === 'PLAY',
@@ -44,6 +31,22 @@ export function useEnemies() {
         return result;
       }, []);
   });
+
+  function spawn(quantity = 1) {
+    const events: Array<SpawnEvent> = [];
+    for (let i = 0; i < quantity; i++) {
+      events.push({
+        type: 'SPAWN',
+        payload: {
+          entity: create({
+            word: getNextWord(),
+          }),
+          position: getRandomPosition(),
+        },
+      });
+    }
+    return emit(...events) as Array<SpawnEvent>;
+  }
 
   return {
     enemies,

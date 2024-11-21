@@ -1,14 +1,17 @@
+import { createSharedComposable } from '@vueuse/core';
 import { useNow } from '@vueuse/core';
 import { computed } from 'vue';
 import type { Emitted, TimeEvent } from '../event/types';
 import { useEvents } from '../event/use-events';
 import { usePlayer } from '../player/use-player';
 
-const { emittedEvents, emit } = useEvents();
-const now = useNow();
-const { health } = usePlayer();
+export const useGame = createSharedComposable(setup);
 
-export function useGame() {
+function setup() {
+  const { emittedEvents, emit } = useEvents();
+  const now = useNow();
+  const { health } = usePlayer();
+
   const time = computed(() => {
     const lastPlayEvent = emittedEvents.value.findLast(
       (event) => event.type === 'PLAY',

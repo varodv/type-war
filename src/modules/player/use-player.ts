@@ -1,11 +1,14 @@
+import { createSharedComposable } from '@vueuse/core';
 import { computed } from 'vue';
 import { useEvents } from '../event/use-events';
 
-const { emittedEvents } = useEvents();
+export const usePlayer = createSharedComposable(setup);
 
-const MAX_HEALTH = 25;
+function setup() {
+  const { emittedEvents } = useEvents();
 
-export function usePlayer() {
+  const MAX_HEALTH = 25;
+
   const health = computed(() => {
     const lastPlayEventIndex = emittedEvents.value.findLastIndex(
       (event) => event.type === 'PLAY',

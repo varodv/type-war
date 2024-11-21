@@ -1,12 +1,15 @@
+import { createSharedComposable } from '@vueuse/core';
 import type { Position } from './types';
 
-function getRandomPosition(): Position {
-  const x = Math.random() < 0.5 ? 0 : 100;
-  const y = Math.random() * 100;
-  return [x, y];
-}
+export const usePosition = createSharedComposable(setup);
 
-export function usePosition() {
+function setup() {
+  function getRandomPosition(): Position {
+    const x = Math.random() < 0.5 ? 0 : 100;
+    const y = Math.random() * 100;
+    return [x, y];
+  }
+
   return {
     getRandomPosition,
   };
