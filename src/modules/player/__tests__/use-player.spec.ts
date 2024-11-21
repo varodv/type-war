@@ -4,6 +4,7 @@ import { useEvents } from '../../event/use-events';
 import { usePlayer } from '../use-player';
 
 const getNextWordMock = vi.fn();
+
 describe('usePlayer', () => {
   const { MAX_HEALTH, health } = usePlayer();
   const { emittedEvents, emit } = useEvents();
@@ -53,6 +54,7 @@ describe('usePlayer', () => {
     });
 
     it('always returns a value not less than 0', () => {
+      emit({ type: 'PLAY' });
       expect(health.value).toEqual(MAX_HEALTH);
       const [
         {
@@ -67,6 +69,12 @@ describe('usePlayer', () => {
       expect(health.value).toEqual(0);
       emit({ type: 'HIT', payload: { source: enemy } });
       expect(health.value).toEqual(0);
+    });
+
+    it("returns 0 while no 'PLAY' event is emitted", () => {
+      expect(health.value).toEqual(0);
+      emit({ type: 'PLAY' });
+      expect(health.value).toEqual(MAX_HEALTH);
     });
   });
 });

@@ -2,9 +2,9 @@ import type { Enemy } from '../../enemy/types';
 import type { Entity } from '../../entity/types';
 import type { Position } from '../../position/types';
 
-export type Event = PlayEvent | SpawnEvent | HitEvent;
+export type Event = TimeEvent | SpawnEvent | HitEvent;
 
-export type PlayEvent = BaseEvent<'PLAY'>;
+export type TimeEvent = BaseEvent<'PLAY' | 'PAUSE' | 'RESUME'>;
 
 export type SpawnEvent = BaseEvent<
   'SPAWN',
@@ -29,7 +29,7 @@ export type Emitted<EventType extends Event> = Entity<
 >;
 
 type BaseEvent<
-  Type extends 'PLAY' | 'SPAWN' | 'HIT',
+  Type extends 'PLAY' | 'PAUSE' | 'RESUME' | 'SPAWN' | 'HIT',
   PlayloadType extends object | undefined = undefined,
 > = {
   type: Type;

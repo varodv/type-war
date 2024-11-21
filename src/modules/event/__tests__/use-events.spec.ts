@@ -24,23 +24,10 @@ describe('useEvents', () => {
           type: 'PLAY',
         },
         {
-          type: 'SPAWN',
-          payload: {
-            entity: {
-              id: 'enemy-1',
-              word: 'testing',
-            },
-            position: [0, 0],
-          },
+          type: 'PAUSE',
         },
         {
-          type: 'HIT',
-          payload: {
-            source: {
-              id: 'enemy-1',
-              word: 'testing',
-            },
-          },
+          type: 'RESUME',
         },
       ];
       const timestamp1 = new Date(0);

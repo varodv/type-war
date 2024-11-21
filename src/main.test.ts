@@ -2,8 +2,10 @@ import { createApp } from 'vue';
 import App from './App.vue';
 import './main';
 
-vi.mock('vue', () => {
+vi.mock('vue', async (importOriginal) => {
+  const actual = await importOriginal();
   return {
+    ...actual,
     createApp: vi.fn().mockReturnValue({
       mount: vi.fn(),
     }),

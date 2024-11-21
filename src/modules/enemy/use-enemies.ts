@@ -32,12 +32,17 @@ export function useEnemies() {
     const lastPlayEventIndex = emittedEvents.value.findLastIndex(
       (event) => event.type === 'PLAY',
     );
-    return emittedEvents.value.reduce<Array<Enemy>>((result, event, index) => {
-      if (index > lastPlayEventIndex && event.type === 'SPAWN') {
-        result.push(event.payload.entity);
-      }
-      return result;
-    }, []);
+    if (lastPlayEventIndex < 0) {
+      return [];
+    }
+    return emittedEvents.value
+      .slice(lastPlayEventIndex + 1)
+      .reduce<Array<Enemy>>((result, event) => {
+        if (event.type === 'SPAWN') {
+          result.push(event.payload.entity);
+        }
+        return result;
+      }, []);
   });
 
   return {

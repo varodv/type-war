@@ -7,6 +7,7 @@ import { useEnemies } from '../use-enemies';
 
 const getNextWordMock = vi.fn(),
   getRandomPositionMock = vi.fn();
+
 describe('useEnemies', () => {
   const { enemies, spawn } = useEnemies();
   const { emittedEvents, emit } = useEvents();
@@ -60,6 +61,15 @@ describe('useEnemies', () => {
       emit({ type: 'PLAY' });
       spawn(quantity);
       expect(enemies.value).toEqual(expected);
+    });
+
+    it("is empty while no 'PLAY' event is emitted", () => {
+      expect(enemies.value).toHaveLength(0);
+      spawn();
+      expect(enemies.value).toHaveLength(0);
+      emit({ type: 'PLAY' });
+      spawn();
+      expect(enemies.value).toHaveLength(1);
     });
   });
 
