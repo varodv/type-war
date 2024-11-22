@@ -15,14 +15,14 @@ describe('usePosition', () => {
     });
 
     it('returns a random point at x:0 half the time', () => {
-      mathMock.random.mockReturnValue(0.4999);
-      expect(getRandomPosition()).toEqual([0, 49.99]);
+      mathMock.random.mockReturnValue(0.49);
+      expect(getRandomPosition()).toEqual([-50, -1]);
       expect(mathMock.random).toHaveBeenCalledTimes(2);
     });
 
     it('returns a random point at x:100 half the time', () => {
       mathMock.random.mockReturnValue(0.5);
-      expect(getRandomPosition()).toEqual([100, 50]);
+      expect(getRandomPosition()).toEqual([50, 0]);
       expect(mathMock.random).toHaveBeenCalledTimes(2);
     });
   });

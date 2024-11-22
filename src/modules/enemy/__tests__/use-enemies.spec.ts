@@ -13,7 +13,7 @@ describe('useEnemies', () => {
   const { emittedEvents, emit } = useEvents();
 
   const nextWord = 'testing',
-    randomPosition: Position = [0, 0],
+    randomPosition: Position = [50, 0],
     timestamp = new Date(0);
   let cryptoMock: ReturnType<typeof mockCrypto>;
   beforeEach(() => {
