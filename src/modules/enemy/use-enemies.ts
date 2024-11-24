@@ -15,20 +15,14 @@ function setup() {
   const { getNextWord } = useGlossary();
   const { getRandomPosition } = usePosition();
 
-  const enemies = computed(() => {
-    if (!emittedEventsSinceLastPlay.value.length) {
-      return [];
-    }
-    return emittedEventsSinceLastPlay.value.reduce<Array<Enemy>>(
-      (result, event) => {
-        if (event.type === 'SPAWN') {
-          result.push(event.payload.entity);
-        }
-        return result;
-      },
-      [],
-    );
-  });
+  const enemies = computed(() =>
+    emittedEventsSinceLastPlay.value.reduce<Array<Enemy>>((result, event) => {
+      if (event.type === 'SPAWN') {
+        result.push(event.payload.entity);
+      }
+      return result;
+    }, []),
+  );
 
   function spawn(quantity = 1) {
     const events: Array<SpawnEvent> = [];
