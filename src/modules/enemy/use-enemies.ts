@@ -10,26 +10,24 @@ import type { Enemy } from './types';
 export const useEnemies = createSharedComposable(setup);
 
 function setup() {
-  const { emittedEvents, emit } = useEvents();
+  const { emittedEventsSinceLastPlay, emit } = useEvents();
   const { create } = useEntity();
   const { getNextWord } = useGlossary();
   const { getRandomPosition } = usePosition();
 
   const enemies = computed(() => {
-    const lastPlayEventIndex = emittedEvents.value.findLastIndex(
-      (event) => event.type === 'PLAY',
-    );
-    if (lastPlayEventIndex < 0) {
+    if (!emittedEventsSinceLastPlay.value.length) {
       return [];
     }
-    return emittedEvents.value
-      .slice(lastPlayEventIndex + 1)
-      .reduce<Array<Enemy>>((result, event) => {
+    return emittedEventsSinceLastPlay.value.reduce<Array<Enemy>>(
+      (result, event) => {
         if (event.type === 'SPAWN') {
           result.push(event.payload.entity);
         }
         return result;
-      }, []);
+      },
+      [],
+    );
   });
 
   function spawn(quantity = 1) {

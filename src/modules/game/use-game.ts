@@ -8,30 +8,26 @@ import { usePlayer } from '../player/use-player';
 export const useGame = createSharedComposable(setup);
 
 function setup() {
-  const { emittedEvents, emit } = useEvents();
+  const { emittedEventsSinceLastPlay, emit } = useEvents();
   const now = useNow();
   const { health } = usePlayer();
 
   const time = computed(() => {
-    const lastPlayEvent = emittedEvents.value.findLast(
-      (event) => event.type === 'PLAY',
-    );
+    const lastPlayEvent = emittedEventsSinceLastPlay.value[0];
     if (!lastPlayEvent) {
       return 0;
     }
     let result = now.value.getTime() - lastPlayEvent.timestamp.getTime();
     let lastPauseEvent: Emitted<TimeEvent> | undefined;
-    emittedEvents.value
-      .slice(emittedEvents.value.indexOf(lastPlayEvent))
-      .forEach((event) => {
-        if (event.type === 'PAUSE') {
-          lastPauseEvent = event;
-        } else if (lastPauseEvent && event.type === 'RESUME') {
-          result -=
-            event.timestamp.getTime() - lastPauseEvent.timestamp.getTime();
-          lastPauseEvent = undefined;
-        }
-      });
+    emittedEventsSinceLastPlay.value.forEach((event) => {
+      if (event.type === 'PAUSE') {
+        lastPauseEvent = event;
+      } else if (lastPauseEvent && event.type === 'RESUME') {
+        result -=
+          event.timestamp.getTime() - lastPauseEvent.timestamp.getTime();
+        lastPauseEvent = undefined;
+      }
+    });
     if (lastPauseEvent) {
       result -= now.value.getTime() - lastPauseEvent.timestamp.getTime();
     }
@@ -39,7 +35,7 @@ function setup() {
   });
 
   const paused = computed(() => {
-    const lastTimeEvent = emittedEvents.value.findLast(
+    const lastTimeEvent = emittedEventsSinceLastPlay.value.findLast(
       (event) =>
         event.type === 'PLAY' ||
         event.type === 'PAUSE' ||

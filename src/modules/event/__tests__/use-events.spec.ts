@@ -3,7 +3,7 @@ import type { Event } from '../types';
 import { useEvents } from '../use-events';
 
 describe('useEvents', () => {
-  const { emittedEvents, emit } = useEvents();
+  const { emittedEvents, emittedEventsSinceLastPlay, emit } = useEvents();
 
   let cryptoMock: ReturnType<typeof mockCrypto>;
   beforeEach(() => {
@@ -15,6 +15,18 @@ describe('useEvents', () => {
   afterEach(() => {
     vi.restoreAllMocks();
     vi.useRealTimers();
+  });
+
+  describe('emittedEventsSinceLastPlay', () => {
+    it('always returns the events emitted after the last "PLAY"', () => {
+      expect(emittedEventsSinceLastPlay.value).toEqual([]);
+      emit({ type: 'PAUSE' }, { type: 'RESUME' });
+      expect(emittedEventsSinceLastPlay.value).toEqual([]);
+      let result = emit({ type: 'PLAY' }, { type: 'PAUSE' });
+      expect(emittedEventsSinceLastPlay.value).toEqual(result);
+      result = emit({ type: 'PLAY' }, { type: 'PAUSE' }, { type: 'RESUME' });
+      expect(emittedEventsSinceLastPlay.value).toEqual(result);
+    });
   });
 
   describe('emit', () => {
