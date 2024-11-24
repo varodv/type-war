@@ -45,7 +45,7 @@ describe('useEnemies', () => {
   });
 
   describe('enemies', () => {
-    it("contains all the enemies spawned after the last 'PLAY' event", () => {
+    it("contains all the enemies spawned since the last 'PLAY' event", () => {
       const expected: Array<Enemy> = [];
       const quantity = 5;
       for (let i = 0; i < quantity; i++) {

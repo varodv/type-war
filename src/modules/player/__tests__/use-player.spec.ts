@@ -29,7 +29,7 @@ describe('usePlayer', () => {
   });
 
   describe('health', () => {
-    it("returns the proper value based on the events emitted after the last 'PLAY'", () => {
+    it("returns the proper value based on the events emitted since the last 'PLAY'", () => {
       emit({ type: 'PLAY' });
       expect(health.value).toEqual(MAX_HEALTH);
       let [

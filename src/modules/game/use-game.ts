@@ -12,7 +12,7 @@ function setup() {
   const now = useNow();
   const { health } = usePlayer();
 
-  const time = computed(() => {
+  const elapsedTime = computed(() => {
     const lastPlayEvent = emittedEventsSinceLastPlay.value[0];
     if (!lastPlayEvent) {
       return 0;
@@ -69,7 +69,7 @@ function setup() {
   }
 
   return {
-    time,
+    elapsedTime,
     paused,
     play,
     pause,

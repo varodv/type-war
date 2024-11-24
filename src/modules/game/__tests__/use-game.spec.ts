@@ -6,7 +6,7 @@ import { useGame } from '../use-game';
 const now = ref(new Date());
 
 describe('useGame', () => {
-  const { time, paused, play, pause, resume } = useGame();
+  const { elapsedTime, paused, play, pause, resume } = useGame();
   const { emittedEvents } = useEvents();
 
   beforeEach(() => {
@@ -18,7 +18,7 @@ describe('useGame', () => {
     vi.restoreAllMocks();
   });
 
-  describe('time', () => {
+  describe('elapsedTime', () => {
     beforeEach(() => {
       setTime(0);
       vi.mock('@vueuse/core', async (importOriginal) => {
@@ -43,20 +43,20 @@ describe('useGame', () => {
       setTime(now.value.getTime() + milliseconds);
     }
 
-    it('returns the last game time excluding all the pauses', () => {
-      expect(time.value).toEqual(0);
+    it('returns the last game elapsed time excluding all the pauses', () => {
+      expect(elapsedTime.value).toEqual(0);
       play();
       const interval = 5000;
       advanceTime(interval);
-      expect(time.value).toEqual(interval);
+      expect(elapsedTime.value).toEqual(interval);
       pause();
       advanceTime(interval);
-      expect(time.value).toEqual(interval);
+      expect(elapsedTime.value).toEqual(interval);
       resume();
       advanceTime(interval);
-      expect(time.value).toEqual(interval * 2);
+      expect(elapsedTime.value).toEqual(interval * 2);
       play();
-      expect(time.value).toEqual(0);
+      expect(elapsedTime.value).toEqual(0);
     });
   });
 

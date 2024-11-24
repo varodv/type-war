@@ -18,7 +18,7 @@ describe('useEvents', () => {
   });
 
   describe('emittedEventsSinceLastPlay', () => {
-    it('always returns the events emitted after the last "PLAY"', () => {
+    it('always returns the events emitted since the last "PLAY"', () => {
       expect(emittedEventsSinceLastPlay.value).toEqual([]);
       emit({ type: 'PAUSE' }, { type: 'RESUME' });
       expect(emittedEventsSinceLastPlay.value).toEqual([]);
