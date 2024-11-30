@@ -94,9 +94,9 @@ function setup() {
         emittedEventsSinceLastPlay.value.length - 1
       ]?.type === 'PLAY'
     ) {
-      spawn(2);
-      nextSpawnTime.value = 4000;
-    } else if (value >= nextSpawnTime.value) {
+      nextSpawnTime.value = 0;
+    }
+    if (value >= nextSpawnTime.value) {
       spawn();
       nextSpawnTime.value += 2000;
     }
