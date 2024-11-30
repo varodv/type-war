@@ -5,6 +5,7 @@ import type { Emitted, HitEvent, SpawnEvent } from '../event/types';
 import { useEvents } from '../event/use-events';
 import { useGame } from '../game/use-game';
 import { useGlossary } from '../glossary/use-glossary';
+import { usePlayer } from '../player/use-player';
 import type { Position } from '../position/types';
 import { usePosition } from '../position/use-position';
 import type { Enemy } from './types';
@@ -17,6 +18,7 @@ function setup() {
   const { getNextWord } = useGlossary();
   const { getRandomPosition } = usePosition();
   const { elapsedTime, getElapsedTimeSince } = useGame();
+  const { getDeathEvent } = usePlayer();
 
   const nextSpawnTime = ref(0);
 
@@ -62,7 +64,10 @@ function setup() {
         "The passed enemy hasn't been spawned since the last 'PLAY'",
       );
     }
-    const lifeTime = getElapsedTimeSince(spawnEvent, getHitEvent(enemy));
+    const lifeTime = getElapsedTimeSince(
+      spawnEvent,
+      getHitEvent(enemy) ?? getDeathEvent(),
+    );
     const maxSpawnCoordinate = Math.max(
       ...spawnEvent.payload.position.map(Math.abs),
     );

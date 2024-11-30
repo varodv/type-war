@@ -6,7 +6,7 @@ import { usePlayer } from '../use-player';
 const getNextWordMock = vi.fn();
 
 describe('usePlayer', () => {
-  const { MAX_HEALTH, health } = usePlayer();
+  const { MAX_HEALTH, health, getDeathEvent } = usePlayer();
   const { emittedEvents, emit } = useEvents();
   const { spawn } = useEnemies();
 
@@ -75,6 +75,39 @@ describe('usePlayer', () => {
       expect(health.value).toEqual(0);
       emit({ type: 'PLAY' });
       expect(health.value).toEqual(MAX_HEALTH);
+    });
+  });
+
+  describe('getDeathEvent', () => {
+    it("returns the event that caused the player's death", () => {
+      expect(getDeathEvent()).toBeUndefined();
+      emit({ type: 'PLAY' });
+      expect(getDeathEvent()).toBeUndefined();
+      emit({
+        type: 'HIT',
+        payload: {
+          source: {
+            id: 'enemy-1',
+            word: '-'.repeat(10),
+            speed: 10,
+          },
+        },
+      });
+      expect(getDeathEvent()).toBeUndefined();
+      const [result] = emit({
+        type: 'HIT',
+        payload: {
+          source: {
+            id: 'enemy-1',
+            word: '-'.repeat(MAX_HEALTH - 10),
+            speed: 10,
+          },
+        },
+      });
+      expect(getDeathEvent()).toEqual(result);
+
+      emit({ type: 'PLAY' });
+      expect(getDeathEvent()).toBeUndefined();
     });
   });
 });

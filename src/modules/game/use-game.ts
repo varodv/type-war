@@ -10,21 +10,14 @@ export const useGame = createSharedComposable(setup);
 function setup() {
   const { emittedEventsSinceLastPlay, emit } = useEvents();
   const now = useNow();
-  const { health } = usePlayer();
+  const { health, getDeathEvent } = usePlayer();
 
   const elapsedTime = computed(() => {
     const lastPlayEvent = emittedEventsSinceLastPlay.value[0];
     if (!lastPlayEvent) {
       return 0;
     }
-    return health.value
-      ? getElapsedTimeSince(lastPlayEvent)
-      : getElapsedTimeSince(
-          lastPlayEvent,
-          emittedEventsSinceLastPlay.value.findLast(
-            (event) => event.type === 'HIT' && 'source' in event.payload,
-          ),
-        );
+    return getElapsedTimeSince(lastPlayEvent, getDeathEvent());
   });
 
   const paused = computed(() => {
