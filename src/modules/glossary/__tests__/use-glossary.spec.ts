@@ -21,12 +21,15 @@ describe('useGlossary', () => {
 
     it('returns a random and not repeteated word from the glossary every time while possible', () => {
       const result: typeof glossary = [];
-      glossary.forEach(() => {
-        const word = useGlossary().getNextWord();
-        expect(glossary).includes(word);
-        expect(result).not.includes(word);
-        result.push(word);
-      }, []);
+      glossary
+        .filter((word) => word.length > 2)
+        .forEach(() => {
+          const word = useGlossary().getNextWord();
+          expect(word.length).toBeGreaterThan(2);
+          expect(glossary).includes(word);
+          expect(result).not.includes(word);
+          result.push(word);
+        }, []);
       expect(shuffleArrayMock).toHaveBeenCalledOnce();
       const word = useGlossary().getNextWord();
       expect(glossary).includes(word);

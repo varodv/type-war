@@ -10,7 +10,7 @@ function setup() {
 
   function getNextWord() {
     if (!shuffledGlossary) {
-      shuffledGlossary = [...glossary];
+      shuffledGlossary = [...glossary.filter((word) => word.length > 2)];
       ArrayUtils.shuffle(shuffledGlossary);
     } else if (nextWordIndex === shuffledGlossary.length) {
       ArrayUtils.shuffle(shuffledGlossary);
