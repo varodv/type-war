@@ -135,21 +135,52 @@ describe('useGame', () => {
       expect(getElapsedTimeSince(emittedEvents.value[0])).toEqual(interval * 2);
       expect(getElapsedTimeSince(emittedEvents.value[1])).toEqual(interval);
       expect(getElapsedTimeSince(emittedEvents.value[2])).toEqual(interval);
+
+      expect(
+        getElapsedTimeSince(emittedEvents.value[0], emittedEvents.value[1]),
+      ).toEqual(interval);
+      expect(
+        getElapsedTimeSince(emittedEvents.value[1], emittedEvents.value[2]),
+      ).toEqual(0);
+      expect(
+        getElapsedTimeSince(emittedEvents.value[0], emittedEvents.value[2]),
+      ).toEqual(interval);
+      expect(
+        getElapsedTimeSince(emittedEvents.value[0], emittedEvents.value[0]),
+      ).toEqual(0);
+
       play();
       advanceTime(interval);
       expect(getElapsedTimeSince(emittedEvents.value[3])).toEqual(interval);
     });
 
-    it("throws an error if the passed event hasn't been emitted since the last 'PLAY'", () => {
+    it("throws an error if the passed target event hasn't been emitted since the last 'PLAY'", () => {
       play();
-      pause();
       play();
       expect(() => getElapsedTimeSince(emittedEvents.value[0])).toThrowError(
-        "The passed event hasn't been emitted since the last 'PLAY'",
+        "The passed target event hasn't been emitted since the last 'PLAY'",
       );
       expect(() =>
-        getElapsedTimeSince(emittedEvents.value[2]),
+        getElapsedTimeSince(emittedEvents.value[1]),
       ).not.toThrowError();
+    });
+
+    it("throws an error if the passed limit event hasn't been emitted since the last 'PLAY'", () => {
+      play();
+      play();
+      expect(() =>
+        getElapsedTimeSince(emittedEvents.value[1], emittedEvents.value[0]),
+      ).toThrowError(
+        "The passed limit event hasn't been emitted since the last 'PLAY'",
+      );
+      expect(() =>
+        getElapsedTimeSince(emittedEvents.value[1], emittedEvents.value[1]),
+      ).not.toThrowError();
+      expect(() =>
+        getElapsedTimeSince(emittedEvents.value[0], emittedEvents.value[0]),
+      ).toThrowError(
+        "The passed target event hasn't been emitted since the last 'PLAY'",
+      );
     });
   });
 });

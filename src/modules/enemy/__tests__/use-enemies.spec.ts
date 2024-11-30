@@ -52,6 +52,7 @@ describe('useEnemies', () => {
         expected.push({
           id: `u-u-i-d-${i + 10}`,
           word: nextWord,
+          speed: 10,
         });
       }
       emit({ type: 'PLAY' });
@@ -86,6 +87,7 @@ describe('useEnemies', () => {
             entity: {
               id: `u-u-i-d-${i + 1}`,
               word: nextWord,
+              speed: 10,
             },
             position: randomPosition,
           },

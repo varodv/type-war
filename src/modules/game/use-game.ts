@@ -54,27 +54,44 @@ function setup() {
     return emit({ type: 'RESUME' })[0];
   }
 
-  function getElapsedTimeSince(event: Emitted<Event>) {
-    const eventIndex = emittedEventsSinceLastPlay.value.findIndex(
-      (ev) => ev.id === event.id,
+  function getElapsedTimeSince(
+    targetEvent: Emitted<Event>,
+    limitEvent?: Emitted<Event>,
+  ) {
+    const targetEventIndex = emittedEventsSinceLastPlay.value.findIndex(
+      (ev) => ev.id === targetEvent.id,
     );
-    if (eventIndex < 0) {
+    if (targetEventIndex < 0) {
       throw new Error(
-        "The passed event hasn't been emitted since the last 'PLAY'",
+        "The passed target event hasn't been emitted since the last 'PLAY'",
       );
     }
-    let result = now.value.getTime() - event.timestamp.getTime();
-    let lastPauseEvent: Emitted<TimeEvent> | undefined;
-    emittedEventsSinceLastPlay.value.slice(eventIndex).forEach((ev) => {
-      if (ev.type === 'PAUSE') {
-        lastPauseEvent = ev;
-      } else if (lastPauseEvent && ev.type === 'RESUME') {
-        result -= ev.timestamp.getTime() - lastPauseEvent.timestamp.getTime();
-        lastPauseEvent = undefined;
+    let limitEventIndex: number | undefined;
+    if (limitEvent) {
+      limitEventIndex = emittedEventsSinceLastPlay.value.findIndex(
+        (ev) => ev.id === limitEvent.id,
+      );
+      if (limitEventIndex < 0) {
+        throw new Error(
+          "The passed limit event hasn't been emitted since the last 'PLAY'",
+        );
       }
-    });
+    }
+    const limitTime = limitEvent?.timestamp.getTime() ?? now.value.getTime();
+    let result = limitTime - targetEvent.timestamp.getTime();
+    let lastPauseEvent: Emitted<TimeEvent> | undefined;
+    emittedEventsSinceLastPlay.value
+      .slice(targetEventIndex, limitEventIndex)
+      .forEach((ev) => {
+        if (ev.type === 'PAUSE') {
+          lastPauseEvent = ev;
+        } else if (lastPauseEvent && ev.type === 'RESUME') {
+          result -= ev.timestamp.getTime() - lastPauseEvent.timestamp.getTime();
+          lastPauseEvent = undefined;
+        }
+      });
     if (lastPauseEvent) {
-      result -= now.value.getTime() - lastPauseEvent.timestamp.getTime();
+      result -= limitTime - lastPauseEvent.timestamp.getTime();
     }
     return result;
   }
