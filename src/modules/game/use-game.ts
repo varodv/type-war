@@ -17,7 +17,14 @@ function setup() {
     if (!lastPlayEvent) {
       return 0;
     }
-    return getElapsedTimeSince(lastPlayEvent);
+    return health.value
+      ? getElapsedTimeSince(lastPlayEvent)
+      : getElapsedTimeSince(
+          lastPlayEvent,
+          emittedEventsSinceLastPlay.value.findLast(
+            (event) => event.type === 'HIT' && 'source' in event.payload,
+          ),
+        );
   });
 
   const paused = computed(() => {

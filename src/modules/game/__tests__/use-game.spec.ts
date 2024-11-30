@@ -1,6 +1,7 @@
 import { computed, ref } from 'vue';
 import { mockCrypto } from '../../../__tests__/tests.utils';
 import { useEvents } from '../../event/use-events';
+import { usePlayer } from '../../player/use-player';
 import { useGame } from '../use-game';
 
 const now = ref(new Date());
@@ -8,7 +9,8 @@ const now = ref(new Date());
 describe('useGame', () => {
   const { elapsedTime, paused, play, pause, resume, getElapsedTimeSince } =
     useGame();
-  const { emittedEvents } = useEvents();
+  const { emittedEvents, emit } = useEvents();
+  const { MAX_HEALTH } = usePlayer();
 
   function setTime(milliseconds: number): void {
     now.value = new Date(milliseconds);
@@ -54,6 +56,38 @@ describe('useGame', () => {
       expect(elapsedTime.value).toEqual(interval * 2);
       play();
       expect(elapsedTime.value).toEqual(0);
+    });
+
+    it("stops at the last enemy 'HIT' if player dies", () => {
+      expect(elapsedTime.value).toEqual(0);
+      play();
+      const interval = 5000;
+      advanceTime(interval);
+      expect(elapsedTime.value).toEqual(interval);
+      emit({
+        type: 'HIT',
+        payload: {
+          source: {
+            id: 'enemy-1',
+            word: '-'.repeat(10),
+            speed: 10,
+          },
+        },
+      });
+      advanceTime(interval);
+      expect(elapsedTime.value).toEqual(interval * 2);
+      emit({
+        type: 'HIT',
+        payload: {
+          source: {
+            id: 'enemy-2',
+            word: '-'.repeat(MAX_HEALTH - 10),
+            speed: 10,
+          },
+        },
+      });
+      advanceTime(interval);
+      expect(elapsedTime.value).toEqual(interval * 2);
     });
   });
 

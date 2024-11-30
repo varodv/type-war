@@ -1,5 +1,5 @@
 import { createSharedComposable } from '@vueuse/core';
-import { computed, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { useEntity } from '../entity/use-entity';
 import type { Emitted, HitEvent, SpawnEvent } from '../event/types';
 import { useEvents } from '../event/use-events';
@@ -17,6 +17,8 @@ function setup() {
   const { getNextWord } = useGlossary();
   const { getRandomPosition } = usePosition();
   const { elapsedTime, getElapsedTimeSince } = useGame();
+
+  const nextSpawnTime = ref(0);
 
   const enemies = computed(() =>
     emittedEventsSinceLastPlay.value.reduce<Array<Enemy>>((result, event) => {
@@ -86,7 +88,18 @@ function setup() {
     ) as Emitted<HitEvent>;
   }
 
-  watch(elapsedTime, () => {
+  watch(elapsedTime, (value) => {
+    if (
+      emittedEventsSinceLastPlay.value[
+        emittedEventsSinceLastPlay.value.length - 1
+      ]?.type === 'PLAY'
+    ) {
+      spawn(2);
+      nextSpawnTime.value = 4000;
+    } else if (value >= nextSpawnTime.value) {
+      spawn();
+      nextSpawnTime.value += 2000;
+    }
     enemies.value.forEach((enemy) => {
       if (
         getHealth(enemy) > 0 &&
