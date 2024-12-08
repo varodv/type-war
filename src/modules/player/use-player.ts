@@ -2,13 +2,12 @@ import { createSharedComposable } from '@vueuse/core';
 import { computed } from 'vue';
 import type { Emitted, HitEvent } from '../event/types';
 import { useEvents } from '../event/use-events';
+import { MAX_HEALTH } from './player.consts';
 
 export const usePlayer = createSharedComposable(setup);
 
 function setup() {
   const { emittedEventsSinceLastPlay } = useEvents();
-
-  const MAX_HEALTH = 25;
 
   const health = computed(() => {
     if (!emittedEventsSinceLastPlay.value.length) {
@@ -31,7 +30,6 @@ function setup() {
   }
 
   return {
-    MAX_HEALTH,
     health,
     getDeathEvent,
   };

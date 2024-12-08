@@ -1,12 +1,13 @@
 import { mockCrypto } from '../../../__tests__/tests.utils';
 import { useEnemies } from '../../enemy/use-enemies';
 import { useEvents } from '../../event/use-events';
+import { MAX_HEALTH } from '../player.consts';
 import { usePlayer } from '../use-player';
 
 const getNextWordMock = vi.fn();
 
 describe('usePlayer', () => {
-  const { MAX_HEALTH, health, getDeathEvent } = usePlayer();
+  const { health, getDeathEvent } = usePlayer();
   const { emittedEvents, emit } = useEvents();
   const { spawn } = useEnemies();
 

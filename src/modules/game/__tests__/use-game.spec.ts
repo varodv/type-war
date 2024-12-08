@@ -1,16 +1,22 @@
 import { computed, ref } from 'vue';
 import { mockCrypto } from '../../../__tests__/tests.utils';
 import { useEvents } from '../../event/use-events';
-import { usePlayer } from '../../player/use-player';
+import { MAX_HEALTH } from '../../player/player.consts';
 import { useGame } from '../use-game';
 
 const now = ref(new Date());
 
 describe('useGame', () => {
-  const { elapsedTime, paused, play, pause, resume, getElapsedTimeSince } =
-    useGame();
+  const {
+    paused,
+    over,
+    elapsedTime,
+    play,
+    pause,
+    resume,
+    getElapsedTimeSince,
+  } = useGame();
   const { emittedEvents, emit } = useEvents();
-  const { MAX_HEALTH } = usePlayer();
 
   function setTime(milliseconds: number): void {
     now.value = new Date(milliseconds);
@@ -39,6 +45,54 @@ describe('useGame', () => {
   afterEach(() => {
     vi.restoreAllMocks();
     vi.useRealTimers();
+  });
+
+  describe('paused', () => {
+    it('returns the proper pause status on every scenario', () => {
+      expect(paused.value).toBeFalsy();
+      play();
+      expect(paused.value).toBeFalsy();
+      pause();
+      expect(paused.value).toBeTruthy();
+      resume();
+      expect(paused.value).toBeFalsy();
+      pause();
+      expect(paused.value).toBeTruthy();
+      play();
+      expect(paused.value).toBeFalsy();
+    });
+  });
+
+  describe('over', () => {
+    it('returns the proper over status on every scenario', () => {
+      expect(over.value).toBeFalsy();
+      play();
+      expect(over.value).toBeFalsy();
+      emit({
+        type: 'HIT',
+        payload: {
+          source: {
+            id: 'enemy-1',
+            word: '-'.repeat(10),
+            speed: 10,
+          },
+        },
+      });
+      expect(over.value).toBeFalsy();
+      emit({
+        type: 'HIT',
+        payload: {
+          source: {
+            id: 'enemy-2',
+            word: '-'.repeat(MAX_HEALTH - 10),
+            speed: 10,
+          },
+        },
+      });
+      expect(over.value).toBeTruthy();
+      play();
+      expect(over.value).toBeFalsy();
+    });
   });
 
   describe('elapsedTime', () => {
@@ -91,22 +145,6 @@ describe('useGame', () => {
     });
   });
 
-  describe('paused', () => {
-    it('returns the proper pause status on every scenario', () => {
-      expect(paused.value).toBeFalsy();
-      play();
-      expect(paused.value).toBeFalsy();
-      pause();
-      expect(paused.value).toBeTruthy();
-      resume();
-      expect(paused.value).toBeFalsy();
-      pause();
-      expect(paused.value).toBeTruthy();
-      play();
-      expect(paused.value).toBeFalsy();
-    });
-  });
-
   describe('play', () => {
     it("emits and returns a 'PLAY' event", () => {
       expect(play()).toEqual(emittedEvents.value[0]);
@@ -121,6 +159,21 @@ describe('useGame', () => {
 
     it('throws an error if the game is not in progress', () => {
       expect(() => pause()).toThrowError('The game is not in progress');
+    });
+
+    it('throws an error if the game is over', () => {
+      play();
+      emit({
+        type: 'HIT',
+        payload: {
+          source: {
+            id: 'enemy-1',
+            word: '-'.repeat(MAX_HEALTH),
+            speed: 10,
+          },
+        },
+      });
+      expect(() => pause()).toThrowError('The game is over');
     });
 
     it('throws an error if the game is already paused', () => {
@@ -139,6 +192,22 @@ describe('useGame', () => {
 
     it('throws an error if the game is not in progress', () => {
       expect(() => resume()).toThrowError('The game is not in progress');
+    });
+
+    it('throws an error if the game is over', () => {
+      play();
+      pause();
+      emit({
+        type: 'HIT',
+        payload: {
+          source: {
+            id: 'enemy-1',
+            word: '-'.repeat(MAX_HEALTH),
+            speed: 10,
+          },
+        },
+      });
+      expect(() => resume()).toThrowError('The game is over');
     });
 
     it('throws an error if the game is already resumed', () => {

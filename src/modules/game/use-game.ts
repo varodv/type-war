@@ -1,24 +1,14 @@
-import { createSharedComposable } from '@vueuse/core';
-import { useNow } from '@vueuse/core';
+import { createSharedComposable, useNow } from '@vueuse/core';
 import { computed } from 'vue';
 import type { Emitted, Event, TimeEvent } from '../event/types';
 import { useEvents } from '../event/use-events';
-import { usePlayer } from '../player/use-player';
+import { MAX_HEALTH } from '../player/player.consts';
 
 export const useGame = createSharedComposable(setup);
 
 function setup() {
   const { emittedEventsSinceLastPlay, emit } = useEvents();
   const now = useNow();
-  const { health, getDeathEvent } = usePlayer();
-
-  const elapsedTime = computed(() => {
-    const lastPlayEvent = emittedEventsSinceLastPlay.value[0];
-    if (!lastPlayEvent) {
-      return 0;
-    }
-    return getElapsedTimeSince(lastPlayEvent, getDeathEvent());
-  });
 
   const paused = computed(() => {
     const lastTimeEvent = emittedEventsSinceLastPlay.value.findLast(
@@ -30,28 +20,60 @@ function setup() {
     return lastTimeEvent?.type === 'PAUSE';
   });
 
+  const over = computed(() => {
+    const enemyDamage = emittedEventsSinceLastPlay.value.reduce(
+      (result, event) => {
+        if (event.type === 'HIT' && 'source' in event.payload) {
+          result += event.payload.source.word.length;
+        }
+        return result;
+      },
+      0,
+    );
+    return enemyDamage >= MAX_HEALTH;
+  });
+
+  const elapsedTime = computed(() => {
+    const lastPlayEvent = emittedEventsSinceLastPlay.value[0];
+    if (!lastPlayEvent) {
+      return 0;
+    }
+    const overEvent = over.value
+      ? emittedEventsSinceLastPlay.value[
+          emittedEventsSinceLastPlay.value.length - 1
+        ]
+      : undefined;
+    return getElapsedTimeSince(lastPlayEvent, overEvent);
+  });
+
   function play() {
-    return emit({ type: 'PLAY' })[0];
+    return emit({ type: 'PLAY' })[0] as Emitted<TimeEvent>;
   }
 
   function pause() {
-    if (health.value === 0) {
+    if (!emittedEventsSinceLastPlay.value.length) {
       throw new Error('The game is not in progress');
+    }
+    if (over.value) {
+      throw new Error('The game is over');
     }
     if (paused.value) {
       throw new Error('The game is already paused');
     }
-    return emit({ type: 'PAUSE' })[0];
+    return emit({ type: 'PAUSE' })[0] as Emitted<TimeEvent>;
   }
 
   function resume() {
-    if (health.value === 0) {
+    if (!emittedEventsSinceLastPlay.value.length) {
       throw new Error('The game is not in progress');
+    }
+    if (over.value) {
+      throw new Error('The game is over');
     }
     if (!paused.value) {
       throw new Error('The game is already resumed');
     }
-    return emit({ type: 'RESUME' })[0];
+    return emit({ type: 'RESUME' })[0] as Emitted<TimeEvent>;
   }
 
   function getElapsedTimeSince(
@@ -97,8 +119,9 @@ function setup() {
   }
 
   return {
-    elapsedTime,
     paused,
+    over,
+    elapsedTime,
     play,
     pause,
     resume,
