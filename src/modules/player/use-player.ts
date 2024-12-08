@@ -1,6 +1,5 @@
 import { createSharedComposable } from '@vueuse/core';
 import { computed } from 'vue';
-import type { Emitted, HitEvent } from '../event/types';
 import { useEvents } from '../event/use-events';
 import { MAX_HEALTH } from './player.consts';
 
@@ -21,16 +20,7 @@ function setup() {
     }, MAX_HEALTH);
   });
 
-  function getDeathEvent() {
-    if (!health.value) {
-      return emittedEventsSinceLastPlay.value.findLast(
-        (event) => event.type === 'HIT' && 'source' in event.payload,
-      ) as Emitted<HitEvent>;
-    }
-  }
-
   return {
     health,
-    getDeathEvent,
   };
 }

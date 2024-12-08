@@ -5,7 +5,6 @@ import type { Emitted, HitEvent, SpawnEvent } from '../event/types';
 import { useEvents } from '../event/use-events';
 import { useGame } from '../game/use-game';
 import { useGlossary } from '../glossary/use-glossary';
-import { usePlayer } from '../player/use-player';
 import type { Position } from '../position/types';
 import { usePosition } from '../position/use-position';
 import type { Enemy } from './types';
@@ -17,8 +16,7 @@ function setup() {
   const { create } = useEntity();
   const { getNextWord } = useGlossary();
   const { getRandomPosition } = usePosition();
-  const { elapsedTime, getElapsedTimeSince } = useGame();
-  const { getDeathEvent } = usePlayer();
+  const { elapsedTime, over, getElapsedTimeSince } = useGame();
 
   const nextSpawnTime = ref(0);
 
@@ -66,7 +64,12 @@ function setup() {
     }
     const lifeTime = getElapsedTimeSince(
       spawnEvent,
-      getHitEvent(enemy) ?? getDeathEvent(),
+      getHitEvent(enemy) ??
+        (over.value
+          ? emittedEventsSinceLastPlay.value[
+              emittedEventsSinceLastPlay.value.length - 1
+            ]
+          : undefined),
     );
     const maxSpawnCoordinate = Math.max(
       ...spawnEvent.payload.position.map(Math.abs),
