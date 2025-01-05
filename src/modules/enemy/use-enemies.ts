@@ -123,5 +123,7 @@ function setup() {
     spawn,
     getHealth,
     getPosition,
+    getSpawnEvent,
+    getHitEvent,
   };
 }

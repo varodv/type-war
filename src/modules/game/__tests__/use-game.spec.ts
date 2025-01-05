@@ -19,6 +19,7 @@ describe('useGame', () => {
     pause,
     resume,
     getElapsedTimeSince,
+    isPausedAt,
   } = useGame();
   const { emittedEvents, emit } = useEvents();
   const { keystrokes } = useKeyboard();
@@ -387,6 +388,38 @@ describe('useGame', () => {
       ).toThrowError(
         "The passed target event hasn't been emitted since the last 'PLAY'",
       );
+    });
+  });
+
+  describe('isPausedAt', () => {
+    it('returns the proper pause status on every scenario', () => {
+      emittedEvents.value = [
+        {
+          id: 'u-u-i-d-1',
+          timestamp: new Date(1),
+          type: 'PLAY',
+        },
+        {
+          id: 'u-u-i-d-2',
+          timestamp: new Date(2),
+          type: 'PAUSE',
+        },
+        {
+          id: 'u-u-i-d-3',
+          timestamp: new Date(3),
+          type: 'RESUME',
+        },
+        {
+          id: 'u-u-i-d-4',
+          timestamp: new Date(4),
+          type: 'PAUSE',
+        },
+      ];
+      expect(isPausedAt(new Date(0))).toBeFalsy();
+      expect(isPausedAt(new Date(1))).toBeFalsy();
+      expect(isPausedAt(new Date(2))).toBeTruthy();
+      expect(isPausedAt(new Date(3))).toBeFalsy();
+      expect(isPausedAt(new Date(4))).toBeTruthy();
     });
   });
 

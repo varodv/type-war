@@ -13,15 +13,7 @@ function setup() {
   const now = useNow();
   const { keystrokes, getKeystrokesMatching } = useKeyboard();
 
-  const paused = computed(() => {
-    const lastTimeEvent = emittedEventsSinceLastPlay.value.findLast(
-      (event) =>
-        event.type === 'PLAY' ||
-        event.type === 'PAUSE' ||
-        event.type === 'RESUME',
-    );
-    return lastTimeEvent?.type === 'PAUSE';
-  });
+  const paused = computed(() => isPausedAt(now.value));
 
   const over = computed(() => {
     const enemyDamage = emittedEventsSinceLastPlay.value.reduce(
@@ -134,6 +126,17 @@ function setup() {
     return result;
   }
 
+  function isPausedAt(timestamp: Date): boolean {
+    const lastTimeEvent = emittedEventsSinceLastPlay.value.findLast(
+      (event) =>
+        event.timestamp.getTime() <= timestamp.getTime() &&
+        (event.type === 'PLAY' ||
+          event.type === 'PAUSE' ||
+          event.type === 'RESUME'),
+    );
+    return lastTimeEvent?.type === 'PAUSE';
+  }
+
   watch(
     keystrokes,
     (value) => {
@@ -162,5 +165,6 @@ function setup() {
     pause,
     resume,
     getElapsedTimeSince,
+    isPausedAt,
   };
 }
