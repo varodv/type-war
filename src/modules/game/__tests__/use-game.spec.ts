@@ -1,6 +1,8 @@
-import { computed, ref } from 'vue';
-import { mockCrypto } from '../../../__tests__/tests.utils';
+import { computed, nextTick, ref } from 'vue';
+import { mockCrypto, stroke } from '../../../__tests__/tests.utils';
+import type { Emitted, HitEvent, TimeEvent } from '../../event/types';
 import { useEvents } from '../../event/use-events';
+import { useKeyboard } from '../../keyboard/use-keyboard';
 import { MAX_HEALTH } from '../../player/player.consts';
 import { useGame } from '../use-game';
 
@@ -10,13 +12,16 @@ describe('useGame', () => {
   const {
     paused,
     over,
+    overEvent,
     elapsedTime,
+    keystrokesToPlay,
     play,
     pause,
     resume,
     getElapsedTimeSince,
   } = useGame();
   const { emittedEvents, emit } = useEvents();
+  const { keystrokes } = useKeyboard();
 
   function setTime(milliseconds: number): void {
     now.value = new Date(milliseconds);
@@ -29,6 +34,7 @@ describe('useGame', () => {
 
   beforeEach(() => {
     emittedEvents.value = [];
+    keystrokes.value = [];
 
     mockCrypto();
 
@@ -66,8 +72,10 @@ describe('useGame', () => {
   describe('over', () => {
     it('returns the proper over status on every scenario', () => {
       expect(over.value).toBeFalsy();
+      expect(overEvent.value).toBeUndefined();
       play();
       expect(over.value).toBeFalsy();
+      expect(overEvent.value).toBeUndefined();
       emit({
         type: 'HIT',
         payload: {
@@ -79,7 +87,8 @@ describe('useGame', () => {
         },
       });
       expect(over.value).toBeFalsy();
-      emit({
+      expect(overEvent.value).toBeUndefined();
+      const lastHitEvent: HitEvent = {
         type: 'HIT',
         payload: {
           source: {
@@ -88,10 +97,17 @@ describe('useGame', () => {
             speed: 10,
           },
         },
-      });
+      };
+      emit(lastHitEvent);
       expect(over.value).toBeTruthy();
+      expect(overEvent.value).toEqual({
+        ...lastHitEvent,
+        id: 'u-u-i-d-3',
+        timestamp: new Date(0),
+      });
       play();
       expect(over.value).toBeFalsy();
+      expect(overEvent.value).toBeUndefined();
     });
   });
 
@@ -142,6 +158,93 @@ describe('useGame', () => {
       });
       advanceTime(interval);
       expect(elapsedTime.value).toEqual(interval * 2);
+    });
+  });
+
+  describe('keystrokesToPlay', () => {
+    it("returns the keystrokes matching the play word during all the game's lifecycle", async () => {
+      const timestamp = new Date(0),
+        interval = 1;
+      expect(keystrokesToPlay.value).toEqual([]);
+      stroke('w', 'a');
+      expect(keystrokesToPlay.value).toEqual([
+        {
+          key: 'w',
+          timestamp,
+        },
+        {
+          key: 'a',
+          timestamp,
+        },
+      ]);
+      stroke('t');
+      expect(keystrokesToPlay.value).toEqual([]);
+      stroke('w', 'a', 'r');
+      expect(keystrokesToPlay.value).toEqual([
+        {
+          key: 'w',
+          timestamp,
+        },
+        {
+          key: 'a',
+          timestamp,
+        },
+        {
+          key: 'r',
+          timestamp,
+        },
+      ]);
+
+      await nextTick();
+      expect(keystrokesToPlay.value).toEqual([
+        {
+          key: 'w',
+          timestamp,
+        },
+        {
+          key: 'a',
+          timestamp,
+        },
+        {
+          key: 'r',
+          timestamp,
+        },
+      ]);
+      advanceTime(interval);
+      stroke('t');
+      expect(keystrokesToPlay.value).toEqual([
+        {
+          key: 'w',
+          timestamp,
+        },
+        {
+          key: 'a',
+          timestamp,
+        },
+        {
+          key: 'r',
+          timestamp,
+        },
+      ]);
+
+      emit({
+        type: 'HIT',
+        payload: {
+          source: {
+            id: 'enemy',
+            word: '-'.repeat(MAX_HEALTH),
+            speed: 10,
+          },
+        },
+      });
+      expect(keystrokesToPlay.value).toEqual([]);
+      stroke('w');
+      expect(keystrokesToPlay.value).toEqual([
+        {
+          key: 'w',
+          timestamp: new Date(timestamp.getTime() + interval),
+        },
+      ]);
     });
   });
 
@@ -284,6 +387,93 @@ describe('useGame', () => {
       ).toThrowError(
         "The passed target event hasn't been emitted since the last 'PLAY'",
       );
+    });
+  });
+
+  describe('WATCH keystrokes', () => {
+    it("controls game's lifecycle emitting time events", async () => {
+      const timestamp = new Date(0),
+        interval = 1;
+      expect(emittedEvents.value).toEqual([]);
+      stroke('Escape');
+      await nextTick();
+      expect(emittedEvents.value).toEqual([]);
+      stroke('w', 'a');
+      await nextTick();
+      expect(emittedEvents.value).toEqual([]);
+      stroke('w', 'a', 'r');
+      await nextTick();
+      const playEvent: Emitted<TimeEvent> = {
+        id: 'u-u-i-d-1',
+        timestamp,
+        type: 'PLAY',
+      };
+      expect(emittedEvents.value).toEqual([playEvent]);
+
+      advanceTime(interval);
+      stroke('w', 'a', 'r');
+      await nextTick();
+      expect(emittedEvents.value).toEqual([playEvent]);
+
+      advanceTime(interval);
+      stroke('Escape');
+      await nextTick();
+      const pauseEvent: Emitted<TimeEvent> = {
+        id: 'u-u-i-d-2',
+        timestamp: new Date(timestamp.getTime() + interval * 2),
+        type: 'PAUSE',
+      };
+      expect(emittedEvents.value).toEqual([playEvent, pauseEvent]);
+
+      advanceTime(interval);
+      stroke('Escape');
+      await nextTick();
+      const resumeEvent: Emitted<TimeEvent> = {
+        id: 'u-u-i-d-3',
+        timestamp: new Date(timestamp.getTime() + interval * 3),
+        type: 'RESUME',
+      };
+      expect(emittedEvents.value).toEqual([playEvent, pauseEvent, resumeEvent]);
+
+      advanceTime(interval);
+      const hitEvent: Emitted<HitEvent> = {
+        id: 'u-u-i-d-4',
+        timestamp: new Date(timestamp.getTime() + interval * 4),
+        type: 'HIT',
+        payload: {
+          source: {
+            id: 'enemy',
+            word: '-'.repeat(MAX_HEALTH),
+            speed: 10,
+          },
+        },
+      };
+      emit({
+        type: hitEvent.type,
+        payload: hitEvent.payload,
+      });
+      stroke('Escape');
+      await nextTick();
+      expect(emittedEvents.value).toEqual([
+        playEvent,
+        pauseEvent,
+        resumeEvent,
+        hitEvent,
+      ]);
+      stroke('w', 'a', 'r');
+      await nextTick();
+      const newPlayEvent: Emitted<TimeEvent> = {
+        id: 'u-u-i-d-5',
+        timestamp: new Date(timestamp.getTime() + interval * 4),
+        type: 'PLAY',
+      };
+      expect(emittedEvents.value).toEqual([
+        playEvent,
+        pauseEvent,
+        resumeEvent,
+        hitEvent,
+        newPlayEvent,
+      ]);
     });
   });
 });

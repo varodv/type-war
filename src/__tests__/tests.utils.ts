@@ -6,3 +6,11 @@ export function mockCrypto() {
   vi.stubGlobal('crypto', cryptoMock);
   return cryptoMock;
 }
+
+export function stroke(...keys: Array<string | KeyboardEventInit>) {
+  keys.forEach((key) =>
+    window.dispatchEvent(
+      new KeyboardEvent('keydown', typeof key === 'string' ? { key } : key),
+    ),
+  );
+}

@@ -1,14 +1,17 @@
 import { createSharedComposable, useNow } from '@vueuse/core';
-import { computed } from 'vue';
+import { computed, watch } from 'vue';
 import type { Emitted, Event, TimeEvent } from '../event/types';
 import { useEvents } from '../event/use-events';
+import { useKeyboard } from '../keyboard/use-keyboard';
 import { MAX_HEALTH } from '../player/player.consts';
+import { PAUSE_KEY, PLAY_WORD } from './game.consts';
 
 export const useGame = createSharedComposable(setup);
 
 function setup() {
   const { emittedEventsSinceLastPlay, emit } = useEvents();
   const now = useNow();
+  const { keystrokes, getKeystrokesMatching } = useKeyboard();
 
   const paused = computed(() => {
     const lastTimeEvent = emittedEventsSinceLastPlay.value.findLast(
@@ -33,18 +36,30 @@ function setup() {
     return enemyDamage >= MAX_HEALTH;
   });
 
+  const overEvent = computed(() =>
+    over.value
+      ? emittedEventsSinceLastPlay.value.findLast(
+          (event) => event.type === 'HIT' && 'source' in event.payload,
+        )
+      : undefined,
+  );
+
   const elapsedTime = computed(() => {
     const lastPlayEvent = emittedEventsSinceLastPlay.value[0];
     if (!lastPlayEvent) {
       return 0;
     }
-    const overEvent = over.value
-      ? emittedEventsSinceLastPlay.value[
-          emittedEventsSinceLastPlay.value.length - 1
-        ]
-      : undefined;
-    return getElapsedTimeSince(lastPlayEvent, overEvent);
+    return getElapsedTimeSince(lastPlayEvent, overEvent.value);
   });
+
+  const keystrokesToPlay = computed(() =>
+    getKeystrokesMatching(PLAY_WORD, (keystroke) =>
+      !overEvent.value
+        ? !emittedEventsSinceLastPlay.value.length ||
+          keystroke.timestamp <= emittedEventsSinceLastPlay.value[0].timestamp
+        : keystroke.timestamp >= overEvent.value.timestamp,
+    ),
+  );
 
   function play() {
     return emit({ type: 'PLAY' })[0] as Emitted<TimeEvent>;
@@ -81,7 +96,7 @@ function setup() {
     limitEvent?: Emitted<Event>,
   ) {
     const targetEventIndex = emittedEventsSinceLastPlay.value.findIndex(
-      (ev) => ev.id === targetEvent.id,
+      (event) => event.id === targetEvent.id,
     );
     if (targetEventIndex < 0) {
       throw new Error(
@@ -91,7 +106,7 @@ function setup() {
     let limitEventIndex: number | undefined;
     if (limitEvent) {
       limitEventIndex = emittedEventsSinceLastPlay.value.findIndex(
-        (ev) => ev.id === limitEvent.id,
+        (event) => event.id === limitEvent.id,
       );
       if (limitEventIndex < 0) {
         throw new Error(
@@ -104,11 +119,12 @@ function setup() {
     let lastPauseEvent: Emitted<TimeEvent> | undefined;
     emittedEventsSinceLastPlay.value
       .slice(targetEventIndex, limitEventIndex)
-      .forEach((ev) => {
-        if (ev.type === 'PAUSE') {
-          lastPauseEvent = ev;
-        } else if (lastPauseEvent && ev.type === 'RESUME') {
-          result -= ev.timestamp.getTime() - lastPauseEvent.timestamp.getTime();
+      .forEach((event) => {
+        if (event.type === 'PAUSE') {
+          lastPauseEvent = event;
+        } else if (lastPauseEvent && event.type === 'RESUME') {
+          result -=
+            event.timestamp.getTime() - lastPauseEvent.timestamp.getTime();
           lastPauseEvent = undefined;
         }
       });
@@ -118,10 +134,30 @@ function setup() {
     return result;
   }
 
+  watch(
+    keystrokes,
+    (value) => {
+      if (!emittedEventsSinceLastPlay.value.length || over.value) {
+        if (keystrokesToPlay.value.length === PLAY_WORD.length) {
+          play();
+        }
+      } else if (value[value.length - 1]?.key === PAUSE_KEY) {
+        if (!paused.value) {
+          pause();
+        } else {
+          resume();
+        }
+      }
+    },
+    { deep: true },
+  );
+
   return {
     paused,
     over,
+    overEvent,
     elapsedTime,
+    keystrokesToPlay,
     play,
     pause,
     resume,

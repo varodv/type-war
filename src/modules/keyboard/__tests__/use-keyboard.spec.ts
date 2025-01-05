@@ -1,13 +1,6 @@
+import { stroke } from '../../../__tests__/tests.utils';
 import type { Keystroke } from '../types';
 import { useKeyboard } from '../use-keyboard';
-
-function stroke(...keys: Array<string | KeyboardEventInit>) {
-  keys.forEach((key) =>
-    window.dispatchEvent(
-      new KeyboardEvent('keydown', typeof key === 'string' ? { key } : key),
-    ),
-  );
-}
 
 describe('useKeyboard', () => {
   const { keystrokes, getKeystrokesMatching } = useKeyboard();
