@@ -1,5 +1,6 @@
 import { computed, nextTick, ref } from 'vue';
 import { mockCrypto, stroke } from '../../../__tests__/tests.utils';
+import { SPEED } from '../../enemy/enemy.consts';
 import type { Emitted, HitEvent, TimeEvent } from '../../event/types';
 import { useEvents } from '../../event/use-events';
 import { useKeyboard } from '../../keyboard/use-keyboard';
@@ -77,25 +78,27 @@ describe('useGame', () => {
       play();
       expect(over.value).toBeFalsy();
       expect(overEvent.value).toBeUndefined();
-      emit({
-        type: 'HIT',
-        payload: {
-          source: {
-            id: 'enemy-1',
-            word: '-'.repeat(10),
-            speed: 10,
+      emit(
+        ...Array.from<never, HitEvent>({ length: MAX_HEALTH - 1 }, (_, i) => ({
+          type: 'HIT',
+          payload: {
+            source: {
+              id: `enemy-${i + 1}`,
+              word: `${i + 1}`,
+              speed: SPEED,
+            },
           },
-        },
-      });
+        })),
+      );
       expect(over.value).toBeFalsy();
       expect(overEvent.value).toBeUndefined();
       const lastHitEvent: HitEvent = {
         type: 'HIT',
         payload: {
           source: {
-            id: 'enemy-2',
-            word: '-'.repeat(MAX_HEALTH - 10),
-            speed: 10,
+            id: `enemy-${MAX_HEALTH}`,
+            word: `${MAX_HEALTH}`,
+            speed: SPEED,
           },
         },
       };
@@ -103,7 +106,7 @@ describe('useGame', () => {
       expect(over.value).toBeTruthy();
       expect(overEvent.value).toEqual({
         ...lastHitEvent,
-        id: 'u-u-i-d-3',
+        id: `u-u-i-d-${MAX_HEALTH + 1}`,
         timestamp: new Date(0),
       });
       play();
@@ -135,25 +138,27 @@ describe('useGame', () => {
       const interval = 5000;
       advanceTime(interval);
       expect(elapsedTime.value).toEqual(interval);
-      emit({
-        type: 'HIT',
-        payload: {
-          source: {
-            id: 'enemy-1',
-            word: '-'.repeat(10),
-            speed: 10,
+      emit(
+        ...Array.from<never, HitEvent>({ length: MAX_HEALTH - 1 }, (_, i) => ({
+          type: 'HIT',
+          payload: {
+            source: {
+              id: `enemy-${i + 1}`,
+              word: `${i + 1}`,
+              speed: SPEED,
+            },
           },
-        },
-      });
+        })),
+      );
       advanceTime(interval);
       expect(elapsedTime.value).toEqual(interval * 2);
       emit({
         type: 'HIT',
         payload: {
           source: {
-            id: 'enemy-2',
-            word: '-'.repeat(MAX_HEALTH - 10),
-            speed: 10,
+            id: `enemy-${MAX_HEALTH}`,
+            word: `${MAX_HEALTH}`,
+            speed: SPEED,
           },
         },
       });
@@ -228,16 +233,18 @@ describe('useGame', () => {
         },
       ]);
 
-      emit({
-        type: 'HIT',
-        payload: {
-          source: {
-            id: 'enemy',
-            word: '-'.repeat(MAX_HEALTH),
-            speed: 10,
+      emit(
+        ...Array.from<never, HitEvent>({ length: MAX_HEALTH }, (_, i) => ({
+          type: 'HIT',
+          payload: {
+            source: {
+              id: `enemy-${i + 1}`,
+              word: `${i + 1}`,
+              speed: SPEED,
+            },
           },
-        },
-      });
+        })),
+      );
       expect(keystrokesToPlay.value).toEqual([]);
       stroke('w');
       expect(keystrokesToPlay.value).toEqual([
@@ -267,16 +274,18 @@ describe('useGame', () => {
 
     it('throws an error if the game is over', () => {
       play();
-      emit({
-        type: 'HIT',
-        payload: {
-          source: {
-            id: 'enemy-1',
-            word: '-'.repeat(MAX_HEALTH),
-            speed: 10,
+      emit(
+        ...Array.from<never, HitEvent>({ length: MAX_HEALTH }, (_, i) => ({
+          type: 'HIT',
+          payload: {
+            source: {
+              id: `enemy-${i + 1}`,
+              word: `${i + 1}`,
+              speed: SPEED,
+            },
           },
-        },
-      });
+        })),
+      );
       expect(() => pause()).toThrowError('The game is over');
     });
 
@@ -301,16 +310,18 @@ describe('useGame', () => {
     it('throws an error if the game is over', () => {
       play();
       pause();
-      emit({
-        type: 'HIT',
-        payload: {
-          source: {
-            id: 'enemy-1',
-            word: '-'.repeat(MAX_HEALTH),
-            speed: 10,
+      emit(
+        ...Array.from<never, HitEvent>({ length: MAX_HEALTH }, (_, i) => ({
+          type: 'HIT',
+          payload: {
+            source: {
+              id: `enemy-${i + 1}`,
+              word: `${i + 1}`,
+              speed: SPEED,
+            },
           },
-        },
-      });
+        })),
+      );
       expect(() => resume()).toThrowError('The game is over');
     });
 
@@ -469,34 +480,30 @@ describe('useGame', () => {
       expect(emittedEvents.value).toEqual([playEvent, pauseEvent, resumeEvent]);
 
       advanceTime(interval);
-      const hitEvent: Emitted<HitEvent> = {
-        id: 'u-u-i-d-4',
-        timestamp: new Date(timestamp.getTime() + interval * 4),
-        type: 'HIT',
-        payload: {
-          source: {
-            id: 'enemy',
-            word: '-'.repeat(MAX_HEALTH),
-            speed: 10,
+      const hitEvents = emit(
+        ...Array.from<never, HitEvent>({ length: MAX_HEALTH }, (_, i) => ({
+          type: 'HIT',
+          payload: {
+            source: {
+              id: `enemy-${i + 1}`,
+              word: `${i + 1}`,
+              speed: SPEED,
+            },
           },
-        },
-      };
-      emit({
-        type: hitEvent.type,
-        payload: hitEvent.payload,
-      });
+        })),
+      );
       stroke('Escape');
       await nextTick();
       expect(emittedEvents.value).toEqual([
         playEvent,
         pauseEvent,
         resumeEvent,
-        hitEvent,
+        ...hitEvents,
       ]);
       stroke('w', 'a', 'r');
       await nextTick();
       const newPlayEvent: Emitted<TimeEvent> = {
-        id: 'u-u-i-d-5',
+        id: `u-u-i-d-${MAX_HEALTH + 4}`,
         timestamp: new Date(timestamp.getTime() + interval * 4),
         type: 'PLAY',
       };
@@ -504,7 +511,7 @@ describe('useGame', () => {
         playEvent,
         pauseEvent,
         resumeEvent,
-        hitEvent,
+        ...hitEvents,
         newPlayEvent,
       ]);
     });

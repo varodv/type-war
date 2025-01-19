@@ -3,6 +3,7 @@ import type { Enemy } from '../../enemy/types';
 import type { Emitted, SpawnEvent } from '../../event/types';
 import { useEvents } from '../../event/use-events';
 import type { Position } from '../../position/types';
+import { SPEED } from '../enemy.consts';
 import { useEnemies } from '../use-enemies';
 
 const getNextWordMock = vi.fn(),
@@ -52,7 +53,7 @@ describe('useEnemies', () => {
         expected.push({
           id: `u-u-i-d-${i + 10}`,
           word: nextWord,
-          speed: 10,
+          speed: SPEED,
         });
       }
       emit({ type: 'PLAY' });
@@ -87,7 +88,7 @@ describe('useEnemies', () => {
             entity: {
               id: `u-u-i-d-${i + 1}`,
               word: nextWord,
-              speed: 10,
+              speed: SPEED,
             },
             position: randomPosition,
           },
