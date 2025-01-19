@@ -19,7 +19,7 @@ function setup() {
     const enemyDamage = emittedEventsSinceLastPlay.value.reduce(
       (result, event) => {
         if (event.type === 'HIT' && 'source' in event.payload) {
-          result += event.payload.source.word.length;
+          result += 1;
         }
         return result;
       },
