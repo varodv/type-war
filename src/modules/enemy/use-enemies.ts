@@ -5,8 +5,10 @@ import type { Emitted, HitEvent, SpawnEvent } from '../event/types';
 import { useEvents } from '../event/use-events';
 import { useGame } from '../game/use-game';
 import { useGlossary } from '../glossary/use-glossary';
+import { SPEED as PLAYER_SPEED } from '../player/player.consts';
 import type { Position } from '../position/types';
 import { usePosition } from '../position/use-position';
+import { MAX_DISTANCE, SPEED } from './enemy.consts';
 import type { Enemy } from './types';
 
 export const useEnemies = createSharedComposable(setup);
@@ -16,7 +18,7 @@ function setup() {
   const { create } = useEntity();
   const { getNextWord } = useGlossary();
   const { getRandomPosition } = usePosition();
-  const { elapsedTime, over, getElapsedTimeSince } = useGame();
+  const { elapsedTime, overEvent, getElapsedTimeSince } = useGame();
 
   const nextSpawnTime = ref(0);
 
@@ -37,7 +39,7 @@ function setup() {
         payload: {
           entity: create({
             word: getNextWord(),
-            speed: 10,
+            speed: SPEED,
           }),
           position: getRandomPosition(),
         },
@@ -55,6 +57,30 @@ function setup() {
     return !getHitEvent(enemy) ? 1 : 0;
   }
 
+  function getDistance(enemy: Enemy) {
+    const spawnEvent = getSpawnEvent(enemy);
+    if (!spawnEvent) {
+      throw new Error(
+        "The passed enemy hasn't been spawned since the last 'PLAY'",
+      );
+    }
+    let result = MAX_DISTANCE;
+    const hitEvent = getHitEvent(enemy);
+    const elapsedTimeBeforeHit = getElapsedTimeSince(
+      spawnEvent,
+      hitEvent ?? overEvent.value,
+    );
+    result -= (enemy.speed - PLAYER_SPEED) * (elapsedTimeBeforeHit / 1000);
+    if (hitEvent) {
+      const elapsedTimeAfterHit = getElapsedTimeSince(
+        hitEvent,
+        overEvent.value,
+      );
+      result -= PLAYER_SPEED * (elapsedTimeAfterHit / 1000);
+    }
+    return result;
+  }
+
   function getPosition(enemy: Enemy) {
     const spawnEvent = getSpawnEvent(enemy);
     if (!spawnEvent) {
@@ -62,23 +88,34 @@ function setup() {
         "The passed enemy hasn't been spawned since the last 'PLAY'",
       );
     }
-    const lifeTime = getElapsedTimeSince(
+    const result = [...spawnEvent.payload.position] as Position;
+    const hitEvent = getHitEvent(enemy);
+    const elapsedTimeBeforeHit = getElapsedTimeSince(
       spawnEvent,
-      getHitEvent(enemy) ??
-        (over.value
-          ? emittedEventsSinceLastPlay.value[
-              emittedEventsSinceLastPlay.value.length - 1
-            ]
-          : undefined),
+      hitEvent ?? overEvent.value,
     );
-    const maxSpawnCoordinate = Math.max(
-      ...spawnEvent.payload.position.map(Math.abs),
-    );
-    const maxLifeTime = maxSpawnCoordinate / (enemy.speed / 1000);
-    const lifeTimePct = lifeTime / maxLifeTime;
-    return spawnEvent.payload.position.map(
-      (coordinate) => coordinate - coordinate * Math.min(lifeTimePct, 1),
-    ) as Position;
+    const maxElapsedTimeBeforeHit =
+      (MAX_DISTANCE / (enemy.speed - PLAYER_SPEED)) * 1000;
+    const elapsedTimeBeforeHitPct =
+      elapsedTimeBeforeHit / maxElapsedTimeBeforeHit;
+    result.forEach((coordinate, index) => {
+      result[index] = coordinate - coordinate * elapsedTimeBeforeHitPct;
+    });
+    if (hitEvent) {
+      const elapsedTimeAfterHit = getElapsedTimeSince(
+        hitEvent,
+        overEvent.value,
+      );
+      const traveledDistanceAfterHit =
+        PLAYER_SPEED * (elapsedTimeAfterHit / 1000);
+      result.forEach((coordinate, index) => {
+        result[index] =
+          coordinate > 0
+            ? coordinate + traveledDistanceAfterHit
+            : coordinate - traveledDistanceAfterHit;
+      });
+    }
+    return result;
   }
 
   function getSpawnEvent(enemy: Enemy) {
@@ -109,10 +146,7 @@ function setup() {
       nextSpawnTime.value += 2000;
     }
     enemies.value.forEach((enemy) => {
-      if (
-        getHealth(enemy) > 0 &&
-        getPosition(enemy).every((coordinate) => coordinate === 0)
-      ) {
+      if (getHealth(enemy) > 0 && getDistance(enemy) <= 0) {
         emit({ type: 'HIT', payload: { source: enemy } });
       }
     });
@@ -122,6 +156,7 @@ function setup() {
     enemies,
     spawn,
     getHealth,
+    getDistance,
     getPosition,
     getSpawnEvent,
     getHitEvent,
