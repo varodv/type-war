@@ -1,4 +1,5 @@
 import { mockCrypto } from '../../../__tests__/tests.utils';
+import { SPEED } from '../../enemy/enemy.consts';
 import { useEvents } from '../../event/use-events';
 import { MAX_HEALTH } from '../player.consts';
 import { usePlayer } from '../use-player';
@@ -26,12 +27,12 @@ describe('usePlayer', () => {
         payload: {
           source: {
             id: 'enemy-1',
-            word: '-'.repeat(10),
-            speed: 10,
+            word: '1',
+            speed: SPEED,
           },
         },
       });
-      expect(health.value).toEqual(MAX_HEALTH - 10);
+      expect(health.value).toEqual(MAX_HEALTH - 1);
 
       emit({ type: 'PLAY' });
       expect(health.value).toEqual(MAX_HEALTH);
@@ -40,8 +41,8 @@ describe('usePlayer', () => {
         payload: {
           source: {
             id: 'enemy-2',
-            word: '-'.repeat(10),
-            speed: 10,
+            word: '2',
+            speed: SPEED,
           },
         },
       });
@@ -50,8 +51,8 @@ describe('usePlayer', () => {
         payload: {
           source: {
             id: 'enemy-3',
-            word: '-'.repeat(10),
-            speed: 10,
+            word: '3',
+            speed: SPEED,
           },
         },
       });
@@ -60,12 +61,12 @@ describe('usePlayer', () => {
         payload: {
           target: {
             id: 'enemy-3',
-            word: '-'.repeat(10),
-            speed: 10,
+            word: '3',
+            speed: SPEED,
           },
         },
       });
-      expect(health.value).toEqual(MAX_HEALTH - 20);
+      expect(health.value).toEqual(MAX_HEALTH - 2);
     });
 
     it('always returns a value not less than 0', () => {
@@ -76,30 +77,52 @@ describe('usePlayer', () => {
         payload: {
           source: {
             id: 'enemy-1',
-            word: '-'.repeat(10),
-            speed: 10,
+            word: '1',
+            speed: SPEED,
           },
         },
       });
-      expect(health.value).toEqual(MAX_HEALTH - 10);
+      expect(health.value).toEqual(MAX_HEALTH - 1);
       emit({
         type: 'HIT',
         payload: {
           source: {
             id: 'enemy-2',
-            word: '-'.repeat(10),
-            speed: 10,
+            word: '2',
+            speed: SPEED,
           },
         },
       });
-      expect(health.value).toEqual(MAX_HEALTH - 20);
+      expect(health.value).toEqual(MAX_HEALTH - 2);
       emit({
         type: 'HIT',
         payload: {
           source: {
             id: 'enemy-3',
-            word: '-'.repeat(10),
-            speed: 10,
+            word: '3',
+            speed: SPEED,
+          },
+        },
+      });
+      expect(health.value).toEqual(MAX_HEALTH - 3);
+      emit({
+        type: 'HIT',
+        payload: {
+          source: {
+            id: 'enemy-4',
+            word: '4',
+            speed: SPEED,
+          },
+        },
+      });
+      expect(health.value).toEqual(MAX_HEALTH - 4);
+      emit({
+        type: 'HIT',
+        payload: {
+          source: {
+            id: 'enemy-5',
+            word: '5',
+            speed: SPEED,
           },
         },
       });
@@ -108,9 +131,9 @@ describe('usePlayer', () => {
         type: 'HIT',
         payload: {
           source: {
-            id: 'enemy-4',
-            word: '-'.repeat(10),
-            speed: 10,
+            id: 'enemy-6',
+            word: '6',
+            speed: SPEED,
           },
         },
       });
