@@ -24,7 +24,7 @@
     "*.{js,json,md,yml}": "prettier --write"
   },
   "dependencies": {
-    "@vueuse/core": "12.3.0",
+    "@vueuse/core": "12.5.0",
     "vue": "3.5.13"
   },
   "devDependencies": {
