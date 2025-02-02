@@ -8,7 +8,7 @@ export function mockCrypto() {
 }
 
 export function stroke(...keys: Array<string | KeyboardEventInit>) {
-  keys.forEach((key) =>
+  keys.forEach(key =>
     window.dispatchEvent(
       new KeyboardEvent('keydown', typeof key === 'string' ? { key } : key),
     ),

@@ -1,6 +1,6 @@
-import { createSharedComposable } from '@vueuse/core';
-import { ref, computed } from 'vue';
 import type { Emitted, Event } from './types';
+import { createSharedComposable } from '@vueuse/core';
+import { computed, ref } from 'vue';
 import { useEntity } from '../entity/use-entity';
 
 export const useEvents = createSharedComposable(setup);
@@ -12,7 +12,7 @@ function setup() {
 
   const emittedEventsSinceLastPlay = computed(() => {
     const lastPlayEventIndex = emittedEvents.value.findLastIndex(
-      (event) => event.type === 'PLAY',
+      event => event.type === 'PLAY',
     );
     if (lastPlayEventIndex < 0) {
       return [];
@@ -22,7 +22,7 @@ function setup() {
 
   function emit(...events: Array<Event>) {
     const timestamp = new Date();
-    const newEvents = events.map<Emitted<Event>>((event) =>
+    const newEvents = events.map<Emitted<Event>>(event =>
       create({
         ...event,
         timestamp,

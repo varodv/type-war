@@ -1,4 +1,4 @@
-export type Keystroke = {
+export interface Keystroke {
   key: string;
   timestamp: Date;
-};
+}

@@ -1,6 +1,6 @@
+import type { Enemy } from '../enemy/types';
 import { createSharedComposable } from '@vueuse/core';
 import { computed, watch } from 'vue';
-import type { Enemy } from '../enemy/types';
 import { useEnemies } from '../enemy/use-enemies';
 import { useEvents } from '../event/use-events';
 import { useGame } from '../game/use-game';
@@ -27,14 +27,14 @@ function setup() {
     }, MAX_HEALTH);
   });
 
-  const target = computed(
+  const target = computed<Enemy | undefined>(
     () =>
       enemies.value
-        .filter((enemy) => getHealth(enemy) && getKeystrokesToHit(enemy).length)
+        .filter(enemy => getHealth(enemy) > 0 && getKeystrokesToHit(enemy).length > 0)
         .sort(
           (target1, target2) =>
-            getKeystrokesToHit(target1)[0].timestamp.getTime() -
-              getKeystrokesToHit(target2)[0].timestamp.getTime() || -1,
+            getKeystrokesToHit(target1)[0].timestamp.getTime()
+            - getKeystrokesToHit(target2)[0].timestamp.getTime() || -1,
         )[0],
   );
 
@@ -46,18 +46,18 @@ function setup() {
     const spawnEvent = getSpawnEvent(enemy);
     if (!spawnEvent) {
       throw new Error(
-        "The passed enemy hasn't been spawned since the last 'PLAY'",
+        'The passed enemy hasn\'t been spawned since the last \'PLAY\'',
       );
     }
     return getKeystrokesMatching(enemy.word, (keystroke) => {
       const lastHitEvent = emittedEventsSinceLastPlay.value.findLast(
-        (event) => event.type === 'HIT' && 'target' in event.payload,
+        event => event.type === 'HIT' && 'target' in event.payload,
       );
       return (
-        keystroke.timestamp >= spawnEvent.timestamp &&
-        !isPausedAt(keystroke.timestamp) &&
-        (!overEvent.value || keystroke.timestamp < overEvent.value.timestamp) &&
-        (!lastHitEvent || keystroke.timestamp > lastHitEvent.timestamp)
+        keystroke.timestamp >= spawnEvent.timestamp
+        && !isPausedAt(keystroke.timestamp)
+        && (!overEvent.value || keystroke.timestamp < overEvent.value.timestamp)
+        && (!lastHitEvent || keystroke.timestamp > lastHitEvent.timestamp)
       );
     });
   }

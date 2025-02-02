@@ -17,11 +17,11 @@ export type SpawnEvent = BaseEvent<
 export type HitEvent = BaseEvent<
   'HIT',
   | {
-      source: Enemy;
-    }
+    source: Enemy;
+  }
   | {
-      target: Enemy;
-    }
+    target: Enemy;
+  }
 >;
 
 export type Emitted<EventType extends Event> = Entity<

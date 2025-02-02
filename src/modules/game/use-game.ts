@@ -1,6 +1,6 @@
+import type { Emitted, Event, TimeEvent } from '../event/types';
 import { createSharedComposable, useNow } from '@vueuse/core';
 import { computed, watch } from 'vue';
-import type { Emitted, Event, TimeEvent } from '../event/types';
 import { useEvents } from '../event/use-events';
 import { useKeyboard } from '../keyboard/use-keyboard';
 import { MAX_HEALTH } from '../player/player.consts';
@@ -31,26 +31,24 @@ function setup() {
   const overEvent = computed(() =>
     over.value
       ? emittedEventsSinceLastPlay.value.findLast(
-          (event) => event.type === 'HIT' && 'source' in event.payload,
+          event => event.type === 'HIT' && 'source' in event.payload,
         )
       : undefined,
   );
 
   const elapsedTime = computed(() => {
-    const lastPlayEvent = emittedEventsSinceLastPlay.value[0];
-    if (!lastPlayEvent) {
+    if (!emittedEventsSinceLastPlay.value.length) {
       return 0;
     }
-    return getElapsedTimeSince(lastPlayEvent, overEvent.value);
+    return getElapsedTimeSince(emittedEventsSinceLastPlay.value[0], overEvent.value);
   });
 
   const keystrokesToPlay = computed(() =>
-    getKeystrokesMatching(PLAY_WORD, (keystroke) =>
+    getKeystrokesMatching(PLAY_WORD, keystroke =>
       !overEvent.value
-        ? !emittedEventsSinceLastPlay.value.length ||
-          keystroke.timestamp <= emittedEventsSinceLastPlay.value[0].timestamp
-        : keystroke.timestamp >= overEvent.value.timestamp,
-    ),
+        ? !emittedEventsSinceLastPlay.value.length
+        || keystroke.timestamp <= emittedEventsSinceLastPlay.value[0].timestamp
+        : keystroke.timestamp >= overEvent.value.timestamp),
   );
 
   function play() {
@@ -88,21 +86,21 @@ function setup() {
     limitEvent?: Emitted<Event>,
   ) {
     const targetEventIndex = emittedEventsSinceLastPlay.value.findIndex(
-      (event) => event.id === targetEvent.id,
+      event => event.id === targetEvent.id,
     );
     if (targetEventIndex < 0) {
       throw new Error(
-        "The passed target event hasn't been emitted since the last 'PLAY'",
+        'The passed target event hasn\'t been emitted since the last \'PLAY\'',
       );
     }
     let limitEventIndex: number | undefined;
     if (limitEvent) {
       limitEventIndex = emittedEventsSinceLastPlay.value.findIndex(
-        (event) => event.id === limitEvent.id,
+        event => event.id === limitEvent.id,
       );
       if (limitEventIndex < 0) {
         throw new Error(
-          "The passed limit event hasn't been emitted since the last 'PLAY'",
+          'The passed limit event hasn\'t been emitted since the last \'PLAY\'',
         );
       }
     }
@@ -114,9 +112,10 @@ function setup() {
       .forEach((event) => {
         if (event.type === 'PAUSE') {
           lastPauseEvent = event;
-        } else if (lastPauseEvent && event.type === 'RESUME') {
-          result -=
-            event.timestamp.getTime() - lastPauseEvent.timestamp.getTime();
+        }
+        else if (lastPauseEvent && event.type === 'RESUME') {
+          result
+            -= event.timestamp.getTime() - lastPauseEvent.timestamp.getTime();
           lastPauseEvent = undefined;
         }
       });
@@ -128,11 +127,11 @@ function setup() {
 
   function isPausedAt(timestamp: Date): boolean {
     const lastTimeEvent = emittedEventsSinceLastPlay.value.findLast(
-      (event) =>
-        event.timestamp.getTime() <= timestamp.getTime() &&
-        (event.type === 'PLAY' ||
-          event.type === 'PAUSE' ||
-          event.type === 'RESUME'),
+      event =>
+        event.timestamp.getTime() <= timestamp.getTime()
+        && (event.type === 'PLAY'
+          || event.type === 'PAUSE'
+          || event.type === 'RESUME'),
     );
     return lastTimeEvent?.type === 'PAUSE';
   }
@@ -144,10 +143,12 @@ function setup() {
         if (keystrokesToPlay.value.length === PLAY_WORD.length) {
           play();
         }
-      } else if (value[value.length - 1]?.key === PAUSE_KEY) {
+      }
+      else if (value[value.length - 1]?.key === PAUSE_KEY) {
         if (!paused.value) {
           pause();
-        } else {
+        }
+        else {
           resume();
         }
       }

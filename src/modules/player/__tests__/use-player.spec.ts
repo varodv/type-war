@@ -19,7 +19,7 @@ describe('usePlayer', () => {
   });
 
   describe('health', () => {
-    it("returns the proper value based on the events emitted since the last 'PLAY'", () => {
+    it('returns the proper value based on the events emitted since the last \'PLAY\'', () => {
       emit({ type: 'PLAY' });
       expect(health.value).toEqual(MAX_HEALTH);
       emit({
@@ -140,7 +140,7 @@ describe('usePlayer', () => {
       expect(health.value).toEqual(0);
     });
 
-    it("returns 0 while no 'PLAY' event is emitted", () => {
+    it('returns 0 while no \'PLAY\' event is emitted', () => {
       expect(health.value).toEqual(0);
       emit({ type: 'PLAY' });
       expect(health.value).toEqual(MAX_HEALTH);

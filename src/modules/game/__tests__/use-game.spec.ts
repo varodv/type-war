@@ -1,7 +1,7 @@
+import type { Emitted, HitEvent, TimeEvent } from '../../event/types';
 import { computed, nextTick, ref } from 'vue';
 import { mockCrypto, stroke } from '../../../__tests__/tests.utils';
 import { SPEED } from '../../enemy/enemy.consts';
-import type { Emitted, HitEvent, TimeEvent } from '../../event/types';
 import { useEvents } from '../../event/use-events';
 import { useKeyboard } from '../../keyboard/use-keyboard';
 import { MAX_HEALTH } from '../../player/player.consts';
@@ -132,7 +132,7 @@ describe('useGame', () => {
       expect(elapsedTime.value).toEqual(0);
     });
 
-    it("stops at the last enemy 'HIT' if player dies", () => {
+    it('stops at the last enemy \'HIT\' if player dies', () => {
       expect(elapsedTime.value).toEqual(0);
       play();
       const interval = 5000;
@@ -168,9 +168,9 @@ describe('useGame', () => {
   });
 
   describe('keystrokesToPlay', () => {
-    it("returns the keystrokes matching the play word during all the game's lifecycle", async () => {
-      const timestamp = new Date(0),
-        interval = 1;
+    it('returns the keystrokes matching the play word during all the game\'s lifecycle', async () => {
+      const timestamp = new Date(0);
+      const interval = 1;
       expect(keystrokesToPlay.value).toEqual([]);
       stroke('w', 'a');
       expect(keystrokesToPlay.value).toEqual([
@@ -257,13 +257,13 @@ describe('useGame', () => {
   });
 
   describe('play', () => {
-    it("emits and returns a 'PLAY' event", () => {
+    it('emits and returns a \'PLAY\' event', () => {
       expect(play()).toEqual(emittedEvents.value[0]);
     });
   });
 
   describe('pause', () => {
-    it("emits and returns a 'PAUSE' event if the game is in progress", () => {
+    it('emits and returns a \'PAUSE\' event if the game is in progress', () => {
       play();
       expect(pause()).toEqual(emittedEvents.value[1]);
     });
@@ -297,7 +297,7 @@ describe('useGame', () => {
   });
 
   describe('resume', () => {
-    it("emits and returns a 'RESUME' event if the game is paused", () => {
+    it('emits and returns a \'RESUME\' event if the game is paused', () => {
       play();
       pause();
       expect(resume()).toEqual(emittedEvents.value[2]);
@@ -372,24 +372,24 @@ describe('useGame', () => {
       expect(getElapsedTimeSince(emittedEvents.value[3])).toEqual(interval);
     });
 
-    it("throws an error if the passed target event hasn't been emitted since the last 'PLAY'", () => {
+    it('throws an error if the passed target event hasn\'t been emitted since the last \'PLAY\'', () => {
       play();
       play();
       expect(() => getElapsedTimeSince(emittedEvents.value[0])).toThrowError(
-        "The passed target event hasn't been emitted since the last 'PLAY'",
+        'The passed target event hasn\'t been emitted since the last \'PLAY\'',
       );
       expect(() =>
         getElapsedTimeSince(emittedEvents.value[1]),
       ).not.toThrowError();
     });
 
-    it("throws an error if the passed limit event hasn't been emitted since the last 'PLAY'", () => {
+    it('throws an error if the passed limit event hasn\'t been emitted since the last \'PLAY\'', () => {
       play();
       play();
       expect(() =>
         getElapsedTimeSince(emittedEvents.value[1], emittedEvents.value[0]),
       ).toThrowError(
-        "The passed limit event hasn't been emitted since the last 'PLAY'",
+        'The passed limit event hasn\'t been emitted since the last \'PLAY\'',
       );
       expect(() =>
         getElapsedTimeSince(emittedEvents.value[1], emittedEvents.value[1]),
@@ -397,7 +397,7 @@ describe('useGame', () => {
       expect(() =>
         getElapsedTimeSince(emittedEvents.value[0], emittedEvents.value[0]),
       ).toThrowError(
-        "The passed target event hasn't been emitted since the last 'PLAY'",
+        'The passed target event hasn\'t been emitted since the last \'PLAY\'',
       );
     });
   });
@@ -435,9 +435,9 @@ describe('useGame', () => {
   });
 
   describe('WATCH keystrokes', () => {
-    it("controls game's lifecycle emitting time events", async () => {
-      const timestamp = new Date(0),
-        interval = 1;
+    it('controls game\'s lifecycle emitting time events', async () => {
+      const timestamp = new Date(0);
+      const interval = 1;
       expect(emittedEvents.value).toEqual([]);
       stroke('Escape');
       await nextTick();

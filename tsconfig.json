@@ -1,19 +1,19 @@
 {
-  "include": ["src/**/*"],
   "compilerOptions": {
-    "strict": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
+    "target": "esnext",
+    "jsx": "preserve",
     "module": "esnext",
     "moduleResolution": "node",
     "types": ["vitest/globals"],
-    "outDir": "dist",
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
     "declaration": true,
     "declarationMap": true,
+    "outDir": "dist",
     "sourceMap": true,
     "esModuleInterop": true,
-    "jsx": "preserve",
-    "target": "esnext",
     "skipLibCheck": true
-  }
+  },
+  "include": ["**/*", ".storybook/*"]
 }

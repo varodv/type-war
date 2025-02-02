@@ -1,5 +1,5 @@
-import { mockCrypto } from '../../../__tests__/tests.utils';
 import type { Event } from '../types';
+import { mockCrypto } from '../../../__tests__/tests.utils';
 import { useEvents } from '../use-events';
 
 describe('useEvents', () => {
