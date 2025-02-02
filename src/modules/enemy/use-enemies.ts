@@ -1,15 +1,15 @@
+import type { Emitted, HitEvent, SpawnEvent } from '../event/types';
+import type { Position } from '../position/types';
+import type { Enemy } from './types';
 import { createSharedComposable } from '@vueuse/core';
 import { computed, ref, watch } from 'vue';
 import { useEntity } from '../entity/use-entity';
-import type { Emitted, HitEvent, SpawnEvent } from '../event/types';
 import { useEvents } from '../event/use-events';
 import { useGame } from '../game/use-game';
 import { useGlossary } from '../glossary/use-glossary';
 import { SPEED as PLAYER_SPEED } from '../player/player.consts';
-import type { Position } from '../position/types';
 import { usePosition } from '../position/use-position';
 import { MAX_DISTANCE, SPEED } from './enemy.consts';
-import type { Enemy } from './types';
 
 export const useEnemies = createSharedComposable(setup);
 
@@ -51,7 +51,7 @@ function setup() {
   function getHealth(enemy: Enemy) {
     if (!getSpawnEvent(enemy)) {
       throw new Error(
-        "The passed enemy hasn't been spawned since the last 'PLAY'",
+        'The passed enemy hasn\'t been spawned since the last \'PLAY\'',
       );
     }
     return !getHitEvent(enemy) ? 1 : 0;
@@ -61,7 +61,7 @@ function setup() {
     const spawnEvent = getSpawnEvent(enemy);
     if (!spawnEvent) {
       throw new Error(
-        "The passed enemy hasn't been spawned since the last 'PLAY'",
+        'The passed enemy hasn\'t been spawned since the last \'PLAY\'',
       );
     }
     let result = MAX_DISTANCE;
@@ -85,7 +85,7 @@ function setup() {
     const spawnEvent = getSpawnEvent(enemy);
     if (!spawnEvent) {
       throw new Error(
-        "The passed enemy hasn't been spawned since the last 'PLAY'",
+        'The passed enemy hasn\'t been spawned since the last \'PLAY\'',
       );
     }
     const result = [...spawnEvent.payload.position] as Position;
@@ -94,10 +94,10 @@ function setup() {
       spawnEvent,
       hitEvent ?? overEvent.value,
     );
-    const maxElapsedTimeBeforeHit =
-      (MAX_DISTANCE / (enemy.speed - PLAYER_SPEED)) * 1000;
-    const elapsedTimeBeforeHitPct =
-      elapsedTimeBeforeHit / maxElapsedTimeBeforeHit;
+    const maxElapsedTimeBeforeHit
+      = (MAX_DISTANCE / (enemy.speed - PLAYER_SPEED)) * 1000;
+    const elapsedTimeBeforeHitPct
+      = elapsedTimeBeforeHit / maxElapsedTimeBeforeHit;
     result.forEach((coordinate, index) => {
       result[index] = coordinate - coordinate * elapsedTimeBeforeHitPct;
     });
@@ -106,11 +106,11 @@ function setup() {
         hitEvent,
         overEvent.value,
       );
-      const traveledDistanceAfterHit =
-        PLAYER_SPEED * (elapsedTimeAfterHit / 1000);
+      const traveledDistanceAfterHit
+        = PLAYER_SPEED * (elapsedTimeAfterHit / 1000);
       result.forEach((coordinate, index) => {
-        result[index] =
-          coordinate > 0
+        result[index]
+          = coordinate > 0
             ? coordinate + traveledDistanceAfterHit
             : coordinate - traveledDistanceAfterHit;
       });
@@ -118,18 +118,18 @@ function setup() {
     return result;
   }
 
-  function getSpawnEvent(enemy: Enemy) {
+  function getSpawnEvent(enemy: Enemy): Emitted<SpawnEvent> | undefined {
     return emittedEventsSinceLastPlay.value.find(
-      (event) => event.type === 'SPAWN' && event.payload.entity.id === enemy.id,
+      event => event.type === 'SPAWN' && event.payload.entity.id === enemy.id,
     ) as Emitted<SpawnEvent>;
   }
 
-  function getHitEvent(enemy: Enemy) {
+  function getHitEvent(enemy: Enemy): Emitted<HitEvent> | undefined {
     return emittedEventsSinceLastPlay.value.find(
-      (event) =>
-        event.type === 'HIT' &&
-        (('source' in event.payload && event.payload.source.id === enemy.id) ||
-          ('target' in event.payload && event.payload.target.id === enemy.id)),
+      event =>
+        event.type === 'HIT'
+        && (('source' in event.payload && event.payload.source.id === enemy.id)
+          || ('target' in event.payload && event.payload.target.id === enemy.id)),
     ) as Emitted<HitEvent>;
   }
 

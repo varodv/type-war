@@ -1,6 +1,6 @@
+import type { Keystroke } from './types';
 import { createSharedComposable, onKeyStroke } from '@vueuse/core';
 import { ref } from 'vue';
-import type { Keystroke } from './types';
 
 export const useKeyboard = createSharedComposable(setup);
 
@@ -30,7 +30,8 @@ function setup() {
       if (targetText.endsWith(matchingWord)) {
         result = targetKeystrokes.slice(-matchingWord.length);
         break;
-      } else {
+      }
+      else {
         matchingWord = matchingWord.slice(0, -1);
       }
     }

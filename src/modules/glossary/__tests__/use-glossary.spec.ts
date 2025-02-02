@@ -22,7 +22,7 @@ describe('useGlossary', () => {
     it('returns a random and not repeteated word from the glossary every time while possible', () => {
       const result: typeof glossary = [];
       glossary
-        .filter((word) => word.length > 2)
+        .filter(word => word.length > 2)
         .forEach(() => {
           const word = useGlossary().getNextWord();
           expect(word.length).toBeGreaterThan(2);

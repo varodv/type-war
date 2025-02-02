@@ -1,21 +1,21 @@
-import { mockCrypto } from '../../../__tests__/tests.utils';
 import type { Enemy } from '../../enemy/types';
 import type { Emitted, SpawnEvent } from '../../event/types';
-import { useEvents } from '../../event/use-events';
 import type { Position } from '../../position/types';
+import { mockCrypto } from '../../../__tests__/tests.utils';
+import { useEvents } from '../../event/use-events';
 import { SPEED } from '../enemy.consts';
 import { useEnemies } from '../use-enemies';
 
-const getNextWordMock = vi.fn(),
-  getRandomPositionMock = vi.fn();
+const getNextWordMock = vi.fn<() => string>();
+const getRandomPositionMock = vi.fn<() => Position>();
 
 describe('useEnemies', () => {
   const { enemies, spawn } = useEnemies();
   const { emittedEvents, emit } = useEvents();
 
-  const nextWord = 'testing',
-    randomPosition: Position = [50, 0],
-    timestamp = new Date(0);
+  const nextWord = 'testing';
+  const randomPosition: Position = [50, 0];
+  const timestamp = new Date(0);
   let cryptoMock: ReturnType<typeof mockCrypto>;
   beforeEach(() => {
     emittedEvents.value = [];
@@ -46,7 +46,7 @@ describe('useEnemies', () => {
   });
 
   describe('enemies', () => {
-    it("contains all the enemies spawned since the last 'PLAY' event", () => {
+    it('contains all the enemies spawned since the last \'PLAY\' event', () => {
       const expected: Array<Enemy> = [];
       const quantity = 5;
       for (let i = 0; i < quantity; i++) {
@@ -65,7 +65,7 @@ describe('useEnemies', () => {
       expect(enemies.value).toEqual(expected);
     });
 
-    it("is empty while no 'PLAY' event is emitted", () => {
+    it('is empty while no \'PLAY\' event is emitted', () => {
       expect(enemies.value).toHaveLength(0);
       spawn();
       expect(enemies.value).toHaveLength(0);

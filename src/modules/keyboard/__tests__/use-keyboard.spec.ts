@@ -1,5 +1,5 @@
-import { stroke } from '../../../__tests__/tests.utils';
 import type { Keystroke } from '../types';
+import { stroke } from '../../../__tests__/tests.utils';
 import { useKeyboard } from '../use-keyboard';
 
 describe('useKeyboard', () => {

@@ -1,5 +1,5 @@
-import { createSharedComposable } from '@vueuse/core';
 import type { Position } from './types';
+import { createSharedComposable } from '@vueuse/core';
 
 export const usePosition = createSharedComposable(setup);
 

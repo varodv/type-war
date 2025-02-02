@@ -7,7 +7,7 @@ describe('ArrayUtils', () => {
       const arrayCopy = [...array];
       ArrayUtils.shuffle(array);
       expect(array).toHaveLength(arrayCopy.length);
-      expect(array.every((item) => arrayCopy.includes(item))).toBeTruthy();
+      expect(array.every(item => arrayCopy.includes(item))).toBeTruthy();
       const shuffledItemsCount = array.reduce<number>((result, item, index) => {
         if (index !== arrayCopy.indexOf(item)) {
           result++;

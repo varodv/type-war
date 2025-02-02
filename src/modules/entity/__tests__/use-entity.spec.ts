@@ -21,10 +21,10 @@ describe('useEntity', () => {
       expect(cryptoMock.randomUUID).toHaveBeenCalledOnce();
     });
 
-    it("throws an error if the given payload already has a property 'id'", () => {
+    it('throws an error if the given payload already has a property \'id\'', () => {
       const payload = { test: 'two', id: 2 };
       expect(() => create(payload)).toThrowError(
-        "The given payload already has a property 'id'",
+        'The given payload already has a property \'id\'',
       );
       expect(cryptoMock.randomUUID).not.toHaveBeenCalled();
     });

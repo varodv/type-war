@@ -1,5 +1,5 @@
-import { createSharedComposable } from '@vueuse/core';
 import type { Entity } from './types';
+import { createSharedComposable } from '@vueuse/core';
 
 export const useEntity = createSharedComposable(setup);
 
@@ -8,7 +8,7 @@ function setup() {
     payload: Type,
   ): Entity<Type> {
     if ('id' in payload) {
-      throw new Error("The given payload already has a property 'id'");
+      throw new Error('The given payload already has a property \'id\'');
     }
     return {
       ...payload,
